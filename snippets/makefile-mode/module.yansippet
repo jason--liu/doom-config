@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: module makefile
+# key: <make
+# expand-env: ((yas-indent-line 'fixed) (indent-tabs-mode t))
+# --
+
+BASEINCLUDE ?= /lib/modules/\`uname -r\`/build
+
+CONFIG_MODULE_SIG=n
+
+obj-m := $1.o
+all :
+	$(MAKE) -C $(BASEINCLUDE) M=$(PWD) modules;
+clean:
+	$(MAKE) -C $(BASEINCLUDE) M=$(PWD) clean;

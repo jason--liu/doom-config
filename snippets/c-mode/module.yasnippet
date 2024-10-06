@@ -1,0 +1,22 @@
+# -*- mode: snippet -*-
+# name: module
+# key:<module
+# --
+
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/device.h>
+#include <linux/slab.h>
+
+static int __init $1(void)
+{
+return 0;
+}
+
+static void __exit $2(void) {
+}
+
+module_init($1);
+module_exit($2);
+MODULE_LICENSE(\"GPL\");

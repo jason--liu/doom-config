@@ -81,6 +81,9 @@
 
 (setq doom-localleader-key ",")
 
+
+(setq confirm-kill-emacs nil)
+
 (auto-save-visited-mode +1)
 (setq auto-save-visited-interval 1)
 (add-hook 'after-init-hook #'auto-save-visited-mode)

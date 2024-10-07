@@ -81,12 +81,23 @@
 
 (setq doom-localleader-key ",")
 
-
 (setq confirm-kill-emacs nil)
 
-(auto-save-visited-mode +1)
-(setq auto-save-visited-interval 1)
-(add-hook 'after-init-hook #'auto-save-visited-mode)
+;; (auto-save-visited-mode +1)
+;; (setq auto-save-visited-interval 1)
+;; (add-hook 'after-init-hook #'auto-save-visited-mode)
+
+(use-package! super-save
+  :defer t
+  :ensure
+  :config
+  (setq super-save-all-buffers t)
+  (setq super-save-idle-duration 1)
+  (setq super-save-auto-save-when-idle t)
+  (setq super-save-delete-trailing-whitespace 'except-current-line)
+  (setq super-save-exclude '(".org"))
+  (super-save-mode +1)
+  )
 
 (use-package! lsp-bridge
   :config
@@ -103,13 +114,11 @@
 ;;TODO
 ;;https://www.skfwe.cn/p/citre-%E5%9C%A8emacs-%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/
 (use-package! citre
-  :defer t
   :config
   (map!
    (:map prog-mode-map
          "M-]" #'citre-jump
          "M-[" #'citre-jump-back)))
-
 
 (after! doom-modeline
   (setq  doom-modeline-buffer-file-name-style 'auto)
@@ -296,14 +305,20 @@
   (rime-user-data-dir (expand-file-name "~/.config/fcitx/rime/"))
   (default-input-method "rime")
   (rime-show-candidate 'posframe)
-  (rime-disable-predicates
-   '(rime-predicate-evil-mode-p
-     rime-predicate-after-alphabet-char-p
-     rime-predicate-prog-in-code-p))
-  (rime-inline-ascii-trigger 'shift-l)
+  ;; (setq rime-disable-predicates
+  ;;  '(rime-predicate-evil-mode-p
+  ;;    rime-predicate-after-alphabet-char-p
+  ;;    rime-predicate-prog-in-code-p))
+ (rime-disable-predicates
+   '(rime-predicate-prog-in-code-p
+     rime-predicate-auto-english-p
+     rime-predicate-punctuation-after-ascii-p
+     rime-predicate-punctuation-line-begin-p
+     rime-predicate-current-uppercase-letter-p))
   :config
   (custom-set-faces!
     `(rime-default-face :background ,(doom-blend 'blue 'base0 0.15)))
+  (define-key rime-mode-map (kbd "C-;") 'rime-force-enable)
   )
 
 ;;org
@@ -422,4 +437,3 @@
   (if (use-region-p)
       (clang-format-region (region-beginning) (region-end))
     (clang-format-buffer)))
-

@@ -15,6 +15,7 @@
 (package! org-download)
 (package! citre)
 (package! clang-format)
+(package! super-save)
 ;; (package! treesit-auto)
 
 

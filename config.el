@@ -175,7 +175,7 @@
 (evil-define-key 'normal 'lsp-bridge-mode (kbd "g d") 'lsp-bridge-find-def)
 (evil-define-key 'normal 'lsp-bridge-mode (kbd "C-t") 'lsp-bridge-find-def-return)
 (evil-define-key 'normal 'lsp-bridge-mode (kbd "g r") 'lsp-bridge-find-references)
-(evil-define-key 'normal 'lsp-bridge-mode (kbd "K") 'lsp-bridge-show-documentation)
+(evil-define-key 'normal 'lsp-bridge-mode (kbd "K") 'lsp-bridge-popup-documentation)
 (evil-define-key 'insert 'lsp-bridge-mode (kbd "C-j") 'acm-select-next)
 (evil-define-key 'insert 'lsp-bridge-mode (kbd "C-k") 'acm-select-prev)
 

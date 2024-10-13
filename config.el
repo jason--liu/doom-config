@@ -322,32 +322,32 @@
   )
 
 ;;org
-(setq org-roam-directory "~/Dropbox/org/roam/")
-(setq org-agenda-files '("~/Dropbox/org/gtd.org"))
-;; (cl-defmethod org-roam-node-directories ((node org-roam-node))
-;;   (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
-;;       (format "(%s)" (car (f-split dirs)))
-;;     ""))
+(after! org-roam
+  (setq org-roam-directory "~/Dropbox/org/roam/")
+  (setq org-agenda-files '("~/Dropbox/org/gtd.org"))
+  (cl-defmethod org-roam-node-directories ((node org-roam-node))
+    (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
+        (format "(%s)" (car (f-split dirs)))
+      ""))
 
-;; (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
-;;   (let* ((count (caar (org-roam-db-query
-;;                        [:select (funcall count source)
-;;                         :from links
-;;                         :where (= dest $s1)
-;;                         :and (= type "id")]
-;;                        (org-roam-node-id node)))))
-;;     (format "[%d]" count)))
-;; (setq org-roam-node-display-template "${directories:10} ${tags:10} ${title:100} ${backlinkscount:6}")
-;;
-;;
-;; hides the emphasis markers
-;; (setq org-hide-emphasis-markers t)
-(defun org-roam-node-insert-immediate (arg &rest args)
-  (interactive "P")
-  (let ((args (cons arg args))
-        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
-                                                  '(:immediate-finish t)))))
-    (apply #'org-roam-node-insert args)))
+  (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
+    (let* ((count (caar (org-roam-db-query
+                         [:select (funcall count source)
+                          :from links
+                          :where (= dest $s1)
+                          :and (= type "id")]
+                         (org-roam-node-id node)))))
+      (format "[%d]" count)))
+  (setq org-roam-node-display-template "${directories:10} ${tags:10} ${title:50} ${backlinkscount:6}")
+  ;; hides the emphasis markers
+  ;; (setq org-hide-emphasis-markers t)
+  (defun org-roam-node-insert-immediate (arg &rest args)
+    (interactive "P")
+    (let ((args (cons arg args))
+          (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                    '(:immediate-finish t)))))
+      (apply #'org-roam-node-insert args)))
+  )
 
 ;; hidden org-download annotation
 (setq org-download-annotate-function (lambda (_link) ""))

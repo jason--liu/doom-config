@@ -423,3 +423,4 @@
     (clang-format-buffer)))
 
 (add-hook 'after-init-hook #'breadcrumb-mode)
+(require 'org-tempo)

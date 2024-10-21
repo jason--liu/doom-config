@@ -121,7 +121,7 @@
          "M-[" #'citre-jump-back)))
 
 (after! doom-modeline
-  (setq  doom-modeline-buffer-file-name-style 'auto)
+  (setq  doom-modeline-buffer-file-name-style 'file-name)
   )
 
 
@@ -437,3 +437,5 @@
   (if (use-region-p)
       (clang-format-region (region-beginning) (region-end))
     (clang-format-buffer)))
+
+(add-hook 'after-init-hook #'breadcrumb-mode)

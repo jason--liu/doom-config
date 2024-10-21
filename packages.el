@@ -16,6 +16,7 @@
 (package! citre)
 (package! clang-format)
 (package! super-save)
+(package! breadcrumb)
 ;; (package! treesit-auto)
 
 

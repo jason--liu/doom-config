@@ -83,22 +83,6 @@
 
 (setq confirm-kill-emacs nil)
 
-;; (auto-save-visited-mode +1)
-;; (setq auto-save-visited-interval 1)
-;; (add-hook 'after-init-hook #'auto-save-visited-mode)
-
-(use-package! super-save
-  :defer t
-  :ensure
-  :config
-  (setq super-save-all-buffers t)
-  (setq super-save-idle-duration 1)
-  (setq super-save-auto-save-when-idle t)
-  (setq super-save-delete-trailing-whitespace 'except-current-line)
-  (setq super-save-exclude '(".org"))
-  (super-save-mode +1)
-  )
-
 (use-package! lsp-bridge
   :config
   (setq lsp-bridge-enable-log nil)
@@ -209,11 +193,11 @@
 
 (add-hook 'prog-mode-hook #'symbol-overlay-mode)
 
-;; (add-to-list 'load-path "~/.spacemacs.d/site-lisp/auto-save")
-;; (require 'auto-save)            ;; 加载自动保存模块
-;; (auto-save-enable)              ;; 开启自动保存功能
-;; (setq auto-save-slient t)       ;; 自动保存的时候静悄悄的， 不要打扰我
-
+(use-package! auto-save
+  :config
+  (auto-save-enable)
+  (setq auto-save-slient t)
+  )
 
 (after! evil-escape
   (setq evil-escape-key-sequence "kj")

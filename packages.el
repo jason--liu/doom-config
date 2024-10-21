@@ -17,6 +17,8 @@
 (package! clang-format)
 (package! super-save)
 (package! breadcrumb)
+(package! auto-save :recipe (:host github :repo "manateelazycat/auto-save"))
+
 ;; (package! treesit-auto)
 
 

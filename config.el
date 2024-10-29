@@ -281,6 +281,12 @@
                                 ("n" "Notes" entry (file "~/Dropbox/org/inbox.org")
                                  "* %^{heading}  %^g\n  %?\n")
                                 ))
+  (add-hook 'org-mode-hook 'org-download-enable)
+;; hidden org-download annotation
+  (setq org-download-annotate-function (lambda (_link) ""))
+  (setq-default org-download-heading-lvl nil)
+  (setq-default org-download-image-dir "./img")
+
   )
 
 (use-package! rime
@@ -332,11 +338,6 @@
                                                     '(:immediate-finish t)))))
       (apply #'org-roam-node-insert args)))
   )
-
-;; hidden org-download annotation
-(setq org-download-annotate-function (lambda (_link) ""))
-(setq-default org-download-heading-lvl nil)
-(setq-default org-download-image-dir "./img")
 
 (defun my/open-org-inbox-file()
   "Open ~/Dropbox/org/inbox.org file"

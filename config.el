@@ -442,3 +442,9 @@
 (add-hook 'gud-mode-hook
           (lambda ()
             (local-set-key (kbd "q") 'my-gud-mode-exit)))
+
+(defun my/asm-comment-tweak ()
+  (setq-local comment-start "// "))
+
+(eval-after-load "asm"
+  (add-hook 'asm-mode-hook #'my/asm-comment-tweak))

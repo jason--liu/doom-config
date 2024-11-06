@@ -315,6 +315,8 @@
 (after! org-roam
   (setq org-roam-directory "~/Dropbox/org/roam/")
   (setq org-agenda-files '("~/Dropbox/org/gtd.org"))
+  (setq org-roam-db-update-on-save nil)
+  (run-with-idle-timer 10 t 'org-roam-db-sync)
   (cl-defmethod org-roam-node-directories ((node org-roam-node))
     (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
         (format "(%s)" (car (f-split dirs)))

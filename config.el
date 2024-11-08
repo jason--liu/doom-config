@@ -115,7 +115,8 @@
 
 (map! :leader
   (:prefix "c" ;code
-  :desc "Comment line" "l" #'comment-line)
+  :desc "Comment line" "l" #'comment-line
+  :desc "Comment/Copy line" "y" #'evilnc-copy-and-comment-lines )
   (:prefix "i" ;insert
            "o" #'symbol-overlay-put
            "q" #'symbol-overlay-remove-all)

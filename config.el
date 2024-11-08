@@ -111,7 +111,15 @@
 
 (after! consult
   (map! "C-s" #'consult-line)
-  (map! :map minibuffer-local-map "C-r" #'consult-history))
+  (map! :map minibuffer-local-map "C-r" #'consult-history)
+  (consult-customize
+   +default/search-project +default/search-other-project
+   +default/search-project-for-symbol-at-point
+   +default/search-cwd +default/search-other-cwd
+   +default/search-notes-for-symbol-at-point
+   +default/search-emacsd
+   :preview-key '(:debounce 0.2 any))
+  )
 
 (map! :leader
   (:prefix "c" ;code

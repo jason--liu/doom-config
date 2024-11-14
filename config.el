@@ -250,7 +250,8 @@
              (string-match-p "finished" string)
              (not (with-current-buffer buffer
                     (goto-char (point-min))
-                    (search-forward "warning" nil t))))
+                    (or(search-forward "warning" nil t)
+                       (search-forward "error" nil t)))))
     (run-with-timer
      1 nil
      (lambda ()

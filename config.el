@@ -413,11 +413,11 @@
   ;; Keybindings for formatting in C/C++ modes
   (map! :map c-mode-map
         :localleader
-        :desc "Format region or buffer" "==" #'doom/clang-format-region-or-buffer
+        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
         :desc "Format function" "=f" #'doom/clang-format-function)
   (map! :map c++-mode-map
         :localleader
-        :desc "Format region or buffer" "==" #'doom/clang-format-region-or-buffer
+        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
         :desc "Format function" "=f" #'doom/clang-format-function)
 
 (defun doom/clang-format-function (&optional style)

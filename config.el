@@ -461,3 +461,7 @@
 
 (eval-after-load "asm"
   (add-hook 'asm-mode-hook #'my/asm-comment-tweak))
+
+(after! ace-window
+  (global-set-key (kbd "M-o") 'ace-window)
+  )

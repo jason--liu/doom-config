@@ -287,7 +287,7 @@
                                  (file+headline "~/Dropbox/org/gtd.org" "Tasks")
                                  "* TODO %i%?")
                                 ("j" "Journal"  entry
-                                 (file+datetree "~/Dropbox/org/journal/journal.org")
+                                 (file+datetree "~/Dropbox/org/journal/journal-2025.org")
                                  "* %U - %^{heading} %^g\n %?\n")
                                 ("n" "Notes" entry (file "~/Dropbox/org/inbox.org")
                                  "* %^{heading}  %^g\n  %?\n")

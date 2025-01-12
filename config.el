@@ -110,7 +110,8 @@
   )
 
 
-(after! consult
+(use-package! consult
+  :config
   (map! "C-s" #'consult-line)
   (map! :map minibuffer-local-map "C-r" #'consult-history)
   (consult-customize

@@ -360,9 +360,9 @@
 (global-set-key (kbd "<f12>") 'my/open-org-inbox-file)
 
 (defun my/open-org-journal-file()
-  "Open ~/Dropbox/org/journal/journal.org file"
+  "Open ~/Dropbox/org/journal/journal-2025.org file"
   (interactive)
-  (find-file "~/Dropbox/org/journal/journal.org"))
+  (find-file "~/Dropbox/org/journal/journal-2025.org"))
 (global-set-key (kbd "<f9>") 'my/open-org-journal-file)
 
 

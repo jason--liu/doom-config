@@ -94,6 +94,7 @@
         (remove 'org-mode-hook lsp-bridge-default-mode-hooks))
   (setq lsp-bridge-default-mode-hooks
         (remove 'emacs-lisp-mode-hook lsp-bridge-default-mode-hooks))
+  (add-hook! 'lsp-bridge-mode-hook (lambda () (corfu-mode -1)))
   (global-lsp-bridge-mode))
 
 ;;TODO

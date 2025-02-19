@@ -83,6 +83,7 @@
 (setq doom-localleader-key ",")
 
 (setq confirm-kill-emacs nil)
+(setq gdb-debuginfod-enable-setting nil)
 
 (use-package! lsp-bridge
   :config

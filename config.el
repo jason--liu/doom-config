@@ -306,7 +306,7 @@
 (use-package! rime
   :defer t
   :custom
-  (rime-user-data-dir (expand-file-name "~/.config/fcitx/rime/"))
+  (rime-user-data-dir (expand-file-name "~/.config/emacs-rime/"))
   (default-input-method "rime")
   (rime-show-candidate 'posframe)
   ;; (setq rime-disable-predicates

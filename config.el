@@ -323,6 +323,38 @@
   (custom-set-faces!
     `(rime-default-face :background ,(doom-blend 'blue 'base0 0.15)))
   (define-key rime-mode-map (kbd "C-;") 'rime-force-enable)
+(defun rime-evil-escape-advice (orig-fun key)
+  "advice for `rime-input-method' to make it work together with `evil-escape'.
+        Mainly modified from `evil-escape-pre-command-hook'"
+  (if rime--preedit-overlay
+      ;; if `rime--preedit-overlay' is non-nil, then we are editing something, do not abort
+      (apply orig-fun (list key))
+    (when (featurep 'evil-escape)
+      (let (
+            (fkey (elt evil-escape-key-sequence 0))
+            (skey (elt evil-escape-key-sequence 1))
+            )
+        (if (or (char-equal key fkey)
+                (and evil-escape-unordered-key-sequence
+                     (char-equal key skey)))
+            (let ((evt (read-event nil nil evil-escape-delay)))
+              (cond
+               ((and (characterp evt)
+                     (or (and (char-equal key fkey) (char-equal evt skey))
+                         (and evil-escape-unordered-key-sequence
+                              (char-equal key skey) (char-equal evt fkey))))
+                (evil-repeat-stop)
+                (evil-normal-state))
+               ((null evt) (apply orig-fun (list key)))
+               (t
+                (apply orig-fun (list key))
+                (if (numberp evt)
+                    (apply orig-fun (list evt))
+                  (setq unread-command-events (append unread-command-events (list evt))))))
+              )
+          (apply orig-fun (list key)))))))
+
+(advice-add 'rime-input-method :around #'rime-evil-escape-advice)
   )
 
 ;;org
@@ -469,3 +501,29 @@
   :config
   (global-set-key (kbd "M-o") 'ace-window)
   )
+
+(use-package! org-media-note
+:hook (org-mode .  org-media-note-mode)
+:bind (
+      ("M-m" . org-media-note-show-interface))  ;; 主功能入口
+:config
+(setq org-media-note-screenshot-image-dir "~/Dropbox/org/roam/org-media-imgs/")  ;; 用于存储视频截图的目录
+(add-to-list 'org-media-note-mpv-general-options
+               "--log-file=/tmp/mpv.log")
+(add-to-list 'org-media-note-mpv-online-website-options-alist
+             '("\\(youtube\\.com\\|youtu\\.be\\)"
+              "--ytdl-raw-options=proxy=socks5://127.0.0.1:7788"
+))
+)
+
+(use-package! websocket
+    :after org-roam)
+
+(use-package! org-roam-ui
+    :after org-roam
+    :config
+    (setq
+     ;; org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))

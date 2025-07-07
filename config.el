@@ -503,21 +503,16 @@
   )
 
 (use-package! org-media-note
-:hook (org-mode .  org-media-note-mode)
-:bind (
-      ("M-m" . org-media-note-show-interface))  ;; 主功能入口
-:config
-(setq org-media-note-screenshot-image-dir "~/Dropbox/org/roam/org-media-imgs/")  ;; 用于存储视频截图的目录
-(add-to-list 'org-media-note-mpv-general-options
-               "--log-file=/tmp/mpv.log")
-(add-to-list 'org-media-note-mpv-online-website-options-alist
-             '("\\(youtube\\.com\\|youtu\\.be\\)"
-              "--ytdl-raw-options=proxy=socks5://127.0.0.1:7788"
-))
-)
-
-(use-package! websocket
-    :after org-roam)
+  :hook (org-mode .  org-media-note-mode)
+  :bind (
+         ("M-m" . org-media-note-show-interface))  ;; 主功能入口
+  :config
+  (setq org-media-note-screenshot-image-dir "~/Dropbox/org/roam/org-media-imgs/")  ;; 用于存储视频截图的目录
+  (add-to-list 'org-media-note-mpv-online-website-options-alist
+               '("\\(youtube\\.com\\|youtu\\.be\\)"
+                 "--ytdl-raw-options=proxy=socks5://127.0.0.1:7788"
+                 ))
+  )
 
 (use-package! org-roam-ui
     :after org-roam

@@ -19,6 +19,8 @@
 (package! breadcrumb)
 (package! auto-save :recipe (:host github :repo "manateelazycat/auto-save"))
 
+(package! org-media-note :recipe (:host github :repo "yuchen-lea/org-media-note"))
+(package! org-roam-ui)
 ;; (package! treesit-auto)
 
 

@@ -301,6 +301,13 @@
   (setq-default org-download-heading-lvl nil)
   (setq-default org-download-image-dir "./img")
 
+  (defun my-org-faces ()
+    ;; (set-face-attribute 'org-todo nil :height 0.8)
+    (set-face-attribute 'org-level-1 nil :height 1.75)
+    (set-face-attribute 'org-level-2 nil :height 1.5)
+    (set-face-attribute 'org-level-3 nil :height 1.25)
+    (set-face-attribute 'org-level-4 nil :height 1.1))
+  (add-hook 'org-mode-hook #'my-org-faces)
   )
 
 (use-package! rime

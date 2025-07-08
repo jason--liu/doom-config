@@ -308,6 +308,10 @@
     (set-face-attribute 'org-level-3 nil :height 1.25)
     (set-face-attribute 'org-level-4 nil :height 1.1))
   (add-hook 'org-mode-hook #'my-org-faces)
+
+  (font-lock-add-keywords 'org-mode
+                          '(("^ +\\([-*]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
   )
 
 (use-package! rime

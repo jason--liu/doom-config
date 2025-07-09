@@ -296,12 +296,12 @@
                                  "* %^{heading}  %^g\n  %?\n")
                                 ))
   (add-hook 'org-mode-hook 'org-download-enable)
-;; hidden org-download annotation
+  ;; hidden org-download annotation
   (setq org-download-annotate-function (lambda (_link) ""))
   (setq-default org-download-heading-lvl nil)
   (setq-default org-download-image-dir "./img")
 
-;; https://zzamboni.org/post/beautifying-org-mode-in-emacs/
+  ;; https://zzamboni.org/post/beautifying-org-mode-in-emacs/
   (defun my-org-faces ()
     ;; (set-face-attribute 'org-todo nil :height 0.8)
     (set-face-attribute 'org-level-1 nil :height 1.75)
@@ -313,6 +313,8 @@
   (font-lock-add-keywords 'org-mode
                           '(("^ +\\([-*]\\) "
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+  (setq org-hide-emphasis-markers t)
+  (add-hook 'org-mode-hook 'org-appear-mode)
   )
 
 (use-package! rime

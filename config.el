@@ -313,8 +313,45 @@
   (font-lock-add-keywords 'org-mode
                           '(("^ +\\([-*]\\) "
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
   (setq org-hide-emphasis-markers t)
   (add-hook 'org-mode-hook 'org-appear-mode)
+
+  (setq org-emphasis-alist
+        '(("*" my-org-emphasis-bold)
+          ("/" my-org-emphasis-italic)
+          ("_" my-org-emphasis-underline)
+          ("=" org-verbatim verbatim)
+          ("~" org-code verbatim)
+          ("+" my-org-emphasis-strike-through)))
+  (defface my-org-emphasis-bold
+    '((default :inherit bold)
+      (((class color) (min-colors 88) (background light))
+       :foreground "#a60000")
+      (((class color) (min-colors 88) (background dark))
+       :foreground "#ffb259"))
+    "My bold emphasis for Org.")
+  (defface my-org-emphasis-italic
+    '((default :inherit italic)
+      (((class color) (min-colors 88) (background light))
+       :foreground "#005e00")
+      (((class color) (min-colors 88) (background dark))
+       :foreground "#44bc44"))
+    "My italic emphasis for Org.")
+
+  (defface my-org-emphasis-underline
+    '((default :inherit underline)
+      (((class color) (min-colors 88) (background light))
+       :foreground "#813e00")
+      (((class color) (min-colors 88) (background dark))
+       :foreground "#d0bc00"))
+    "My underline emphasis for Org.")
+  (defface my-org-emphasis-strike-through
+    '((((class color) (min-colors 88) (background light))
+       :strike-through "#972500" :foreground "#505050")
+      (((class color) (min-colors 88) (background dark))
+       :strike-through "#ef8b50" :foreground "#a8a8a8"))
+    "My strike-through emphasis for Org.")
   )
 
 (use-package! rime

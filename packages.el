@@ -21,6 +21,7 @@
 (package! org-appear)
 (package! org-media-note :recipe (:host github :repo "yuchen-lea/org-media-note"))
 (package! org-roam-ui)
+(package! go-translate :recipe (:host github :repo "lorniu/go-translate"))
 ;; (package! treesit-auto)
 
 

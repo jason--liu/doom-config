@@ -563,6 +563,13 @@
                '("\\(youtube\\.com\\|youtu\\.be\\)"
                  "--ytdl-raw-options=proxy=socks5://127.0.0.1:7788"
                  ))
+  (add-to-list 'org-media-note-mpv-online-website-options-alist
+               '("\\(bilibili\\.com\\)"
+                 "--referrer=https://www.bilibili.com"
+                 "--ytdl-raw-options=cookies-from-browser=[chrome]"))
+  ;; (add-to-list 'org-media-note-mpv-general-options
+  ;;              "--log-file=/tmp/mpv.log")
+
   )
 
 (use-package! org-roam-ui

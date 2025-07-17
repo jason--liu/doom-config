@@ -582,25 +582,25 @@
           org-roam-ui-open-on-start t))
 
 (use-package! go-translate
-:config
-(map! (:map gt-overlay-render-map
-            "C-g" #'gt-delete-render-overlays
-            ))
-(setq gt-source-text-transformer
-      (lambda (c engine )
-        (string-replace "\n" " " c)))
-(setq gt-langs '(en zh))
-(setq gt-default-translator
-      (gt-translator
-       :taker   (list (gt-taker :pick nil :if 'selection)
-                      (gt-taker :text 'paragraph :if '(Info-mode help-mode))
-                      (gt-taker :text 'buffer :pick 'fresh-word :if 'read-only)
-                      (gt-taker :text 'word))
-       :engines (list (gt-youdao-dict-engine :if 'word)
-                      (gt-bing-engine :if 'no-word))
-       :render  (list (gt-overlay-render :if 'selection)
-                      (gt-overlay-render :if 'read-only)
-                      (gt-insert-render :if (lambda (translator) (member (buffer-name) '("COMMIT_EDITMSG"))))
-                      ;; (gt-alert-render :if '(and xxx-mode (or not-selection (and read-only parts))))
-                      (gt-buffer-render :if 'word))))
-)
+  :config
+  (map! (:map gt-overlay-render-map
+              "C-g" #'gt-delete-render-overlays
+              ))
+  (setq gt-source-text-transformer
+        (lambda (c engine )
+          (string-replace "\n" " " c)))
+  (setq gt-langs '(en zh))
+  (setq gt-default-translator
+        (gt-translator
+         :taker   (list (gt-taker :pick nil :if 'selection)
+                        (gt-taker :text 'paragraph :if '(Info-mode help-mode))
+                        (gt-taker :text 'buffer :pick 'fresh-word :if 'read-only)
+                        (gt-taker :text 'word))
+         :engines (list (gt-youdao-dict-engine :if 'word)
+                        (gt-bing-engine :if 'no-word))
+         :render  (list (gt-overlay-render :if 'selection)
+                        (gt-overlay-render :if 'read-only)
+                        (gt-insert-render :if (lambda (translator) (member (buffer-name) '("COMMIT_EDITMSG"))))
+                        ;; (gt-alert-render :if '(and xxx-mode (or not-selection (and read-only parts))))
+                        (gt-buffer-render :if 'word))))
+  )

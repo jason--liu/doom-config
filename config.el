@@ -604,3 +604,9 @@
                         ;; (gt-alert-render :if '(and xxx-mode (or not-selection (and read-only parts))))
                         (gt-buffer-render :if 'word))))
   )
+
+(use-package! dape
+  :config
+  ;; (setq dape-buffer-window-arrangement 'right)
+(add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line)
+  )

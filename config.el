@@ -610,3 +610,8 @@
   ;; (setq dape-buffer-window-arrangement 'right)
 (add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line)
   )
+
+(use-package! leetcode
+  :config
+(setq leetcode-prefer-language "c")
+  )

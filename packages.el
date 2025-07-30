@@ -22,6 +22,7 @@
 (package! org-media-note :recipe (:host github :repo "yuchen-lea/org-media-note"))
 (package! org-roam-ui)
 (package! go-translate :recipe (:host github :repo "lorniu/go-translate"))
+(package! leetcode)
 ;; (package! treesit-auto)
 
 
@@ -75,7 +76,7 @@
                  :build (:not compile)))
   (package! markdown-mode)
   (package! yasnippet))
-  
+
   (straight-use-package
  '(popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
 
@@ -85,4 +86,3 @@
     :recipe (:host nil :repo "https://codeberg.org/akib/emacs-popon.git"))
   (package! acm-terminal
     :recipe (:host github :repo "twlz0ne/acm-terminal")))
-    

@@ -85,18 +85,18 @@
 (setq confirm-kill-emacs nil)
 (setq gdb-debuginfod-enable-setting nil)
 
-(use-package! lsp-bridge
-  :config
-  (setq lsp-bridge-enable-log nil)
-  (setq acm-candidate-match-function 'orderless-flex)
-  (setq lsp-bridge-find-def-fallback-function 'citre-jump)
-  (setq lsp-bridge-find-ref-fallback-function 'citre-jump-to-reference)
-  (setq lsp-bridge-default-mode-hooks
-        (remove 'org-mode-hook lsp-bridge-default-mode-hooks))
-  (setq lsp-bridge-default-mode-hooks
-        (remove 'emacs-lisp-mode-hook lsp-bridge-default-mode-hooks))
-  (add-hook! 'lsp-bridge-mode-hook (lambda () (corfu-mode -1)))
-  (global-lsp-bridge-mode))
+;; (use-package! lsp-bridge
+;;   :config
+;;   (setq lsp-bridge-enable-log nil)
+;;   (setq acm-candidate-match-function 'orderless-flex)
+;;   (setq lsp-bridge-find-def-fallback-function 'citre-jump)
+;;   (setq lsp-bridge-find-ref-fallback-function 'citre-jump-to-reference)
+;;   (setq lsp-bridge-default-mode-hooks
+;;         (remove 'org-mode-hook lsp-bridge-default-mode-hooks))
+;;   (setq lsp-bridge-default-mode-hooks
+;;         (remove 'emacs-lisp-mode-hook lsp-bridge-default-mode-hooks))
+;;   (add-hook! 'lsp-bridge-mode-hook (lambda () (corfu-mode -1)))
+;;   (global-lsp-bridge-mode))
 
 ;;TODO
 ;;https://www.skfwe.cn/p/citre-%E5%9C%A8emacs-%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/
@@ -211,6 +211,19 @@
   (auto-save-enable)
   (setq auto-save-slient t)
   )
+;; (use-package! super-save
+;;   :ensure t
+;;   :config
+;;   (setq auto-save-default nil)
+;;   ;; (setq super-save-idle-duration 1)
+;;   ;; (setq super-save-auto-save-when-idle t)
+;;   (add-to-list 'super-save-triggers 'evil-normal-state)
+;;   (add-to-list 'super-save-triggers 'ace-window)
+;;   (setq super-save-silent t)
+;;   (setq super-save-all-buffers t)
+;;   (setq super-save-delete-trailing-whitespace 'except-current-line)
+;;   (super-save-mode +1)
+;;   )
 
 (after! evil-escape
   (setq evil-escape-key-sequence "kj")
@@ -239,12 +252,13 @@
             (require 'yasnippet)
             (yas-global-mode 1)
 
-            (require 'lsp-bridge)
-            (global-lsp-bridge-mode)
+            ;; (require 'lsp-bridge)
+            ;; (global-lsp-bridge-mode)
 
-            (unless (display-graphic-p)
-              (with-eval-after-load 'acm
-                (require 'acm-terminal)))))
+            ;; (unless (display-graphic-p)
+            ;;   (with-eval-after-load 'acm
+            ;;     (require 'acm-terminal)))
+	    ))
 
 ;; bury compilation windown
 (defun bury-compile-buffer-if-successful (buffer string)
@@ -436,6 +450,17 @@
           (org-roam-capture-templates (list (append (car org-roam-capture-templates)
                                                     '(:immediate-finish t)))))
       (apply #'org-roam-node-insert args)))
+
+
+;; (setq org-roam-mode-sections
+;;       '((org-roam-backlinks-section :unique t)
+;;         org-roam-reflinks-section))
+
+(setq org-roam-mode-sections
+      (list #'org-roam-backlinks-section
+            #'org-roam-reflinks-section
+            'org-roam-unlinked-references-section
+            ))
   )
 
 (defun my/open-org-inbox-file()
@@ -464,6 +489,7 @@
 ;;   :init
 ;;   (setq treesit-language-source-alist
 ;;     '((elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
+;;       (bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
 ;;       (c       . ("https://github.com/tree-sitter/tree-sitter-c"))
 ;;       (cpp       . ("https://github.com/tree-sitter/tree-sitter-cpp"))
 ;;       ))
@@ -561,7 +587,7 @@
   (setq org-media-note-screenshot-image-dir "~/Dropbox/org/roam/org-media-imgs/")  ;; 用于存储视频截图的目录
   (add-to-list 'org-media-note-mpv-online-website-options-alist
                '("\\(youtube\\.com\\|youtu\\.be\\)"
-                 "--ytdl-raw-options=proxy=socks5://127.0.0.1:7788"
+                 "--ytdl-raw-options=proxy=http://127.0.0.1:7788"
                  ))
   (add-to-list 'org-media-note-mpv-online-website-options-alist
                '("\\(bilibili\\.com\\)"
@@ -581,29 +607,29 @@
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
 
-(use-package! go-translate
-  :config
-  (map! (:map gt-overlay-render-map
-              "C-g" #'gt-delete-render-overlays
-              ))
-  (setq gt-source-text-transformer
-        (lambda (c engine )
-          (string-replace "\n" " " c)))
-  (setq gt-langs '(en zh))
-  (setq gt-default-translator
-        (gt-translator
-         :taker   (list (gt-taker :pick nil :if 'selection)
-                        (gt-taker :text 'paragraph :if '(Info-mode help-mode))
-                        (gt-taker :text 'buffer :pick 'fresh-word :if 'read-only)
-                        (gt-taker :text 'word))
-         :engines (list (gt-youdao-dict-engine :if 'word)
-                        (gt-bing-engine :if 'no-word))
-         :render  (list (gt-overlay-render :if 'selection)
-                        (gt-overlay-render :if 'read-only)
-                        (gt-insert-render :if (lambda (translator) (member (buffer-name) '("COMMIT_EDITMSG"))))
-                        ;; (gt-alert-render :if '(and xxx-mode (or not-selection (and read-only parts))))
-                        (gt-buffer-render :if 'word))))
-  )
+;; (use-package! go-translate
+;;   :config
+;;   (map! (:map gt-overlay-render-map
+;;               "C-g" #'gt-delete-render-overlays
+;;               ))
+;;   (setq gt-source-text-transformer
+;;         (lambda (c engine )
+;;           (string-replace "\n" " " c)))
+;;   (setq gt-langs '(en zh))
+;;   (setq gt-default-translator
+;;         (gt-translator
+;;          :taker   (list (gt-taker :pick nil :if 'selection)
+;;                         (gt-taker :text 'paragraph :if '(Info-mode help-mode))
+;;                         (gt-taker :text 'buffer :pick 'fresh-word :if 'read-only)
+;;                         (gt-taker :text 'word))
+;;          :engines (list (gt-youdao-dict-engine :if 'word)
+;;                         (gt-bing-engine :if 'no-word))
+;;          :render  (list (gt-overlay-render :if 'selection)
+;;                         (gt-overlay-render :if 'read-only)
+;;                         (gt-insert-render :if (lambda (translator) (member (buffer-name) '("COMMIT_EDITMSG"))))
+;;                         ;; (gt-alert-render :if '(and xxx-mode (or not-selection (and read-only parts))))
+;;                         (gt-buffer-render :if 'word))))
+;;   )
 
 (use-package! dape
   :config
@@ -615,3 +641,15 @@
   :config
 (setq leetcode-prefer-language "c")
   )
+
+(use-package! eglot
+  :config
+  (map! :map eglot-mode-map
+         :n "gr"  #'xref-find-references)
+  (add-to-list 'eglot-server-programs
+               '((c-mode c-ts-mode c++-mode c++-ts-mode) .
+                 ("clangd"
+                  "--clang-tidy"
+                  "--all-scopes-completion"
+                  "--header-insertion=never"
+                  "--header-insertion-decorators=0"))))

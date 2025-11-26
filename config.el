@@ -153,20 +153,6 @@
           "C-c C-t" #'lsp-bridge-peek
           )
          )
- ;; (:after minibuffer
-         ;; :map minibuffer-local-map
-         ;; "C-k" #'kill-line)
- ;; (:after cc-mode
- ;;         (:map c-mode-map
- ;;          :localleader :prefix ("=" "format")
- ;;          :desc "Format all region" "f" #'format-all-region
- ;;          )
- ;;         (:map c-ts-mode-map
- ;;          :localleader :prefix ("=" "format")
- ;;          :desc "Format all region" "f" #'format-all-region
- ;;          )
- ;;         )
- )
 
 ;; (evil-define-key 'motion 'lsp-bridge-mode (kbd "C-]") 'lsp-bridge-find-def)
 (evil-define-key 'normal 'lsp-bridge-mode (kbd "g d") 'lsp-bridge-find-def)
@@ -176,33 +162,44 @@
 (evil-define-key 'insert 'lsp-bridge-mode (kbd "C-j") 'acm-select-next)
 (evil-define-key 'insert 'lsp-bridge-mode (kbd "C-k") 'acm-select-prev)
 
-(defun my-c-mode-font-lock-if0 (limit)
+(defun my-c-common-font-lock-if0 (limit)
   (save-restriction
     (widen)
     (save-excursion
       (goto-char (point-min))
       (let ((depth 0) str start start-depth)
+        ;; Search for #if, #else, #endif
         (while (re-search-forward "^\\s-*#\\s-*\\(if\\|else\\|endif\\)" limit 'move)
           (setq str (match-string 1))
           (if (string= str "if")
               (progn
                 (setq depth (1+ depth))
+                ;; Check if it is "#if 0"
                 (when (and (null start) (looking-at "\\s-+0"))
                   (setq start (match-end 0)
                         start-depth depth)))
             (when (and start (= depth start-depth))
-              (c-put-font-lock-face start (match-beginning 0) 'font-lock-comment-face)
+              ;; CHANGE 1: Use standard 'put-text-property instead of c-put-font-lock-face
+              ;; We use 'face property directly, prepending to existing fontification
+              (put-text-property start (match-beginning 0) 'face 'font-lock-comment-face)
               (setq start nil))
             (when (string= str "endif")
               (setq depth (1- depth)))))
         (when (and start (> depth 0))
-          (c-put-font-lock-face start (point) 'font-lock-comment-face)))))
+          ;; CHANGE 2: Handle the unclosed block case
+          (put-text-property start (point) 'face 'font-lock-comment-face)))))
   nil)
-(defun my-c-mode-common-hook ()
+
+(defun my-c-ts-mode-hook ()
+  ;; Add the keyword to c-ts-mode
   (font-lock-add-keywords
    nil
-   '((my-c-mode-font-lock-if0 (0 font-lock-comment-face prepend))) 'add-to-end))
-(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
+   '((my-c-common-font-lock-if0 (0 font-lock-comment-face prepend)))
+   'add-to-end))
+
+;; Apply to c-ts-mode
+(add-hook 'c-ts-mode-hook 'my-c-ts-mode-hook)
+(add-hook 'c++-ts-mode-hook 'my-c-ts-mode-hook)
 
 (add-hook 'prog-mode-hook #'symbol-overlay-mode)
 

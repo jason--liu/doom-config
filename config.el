@@ -527,19 +527,36 @@
         :localleader
         :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
         :desc "Format function" "=f" #'doom/clang-format-function)
+  (map! :map c-ts-mode-map
+        :localleader
+        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
+        :desc "Format function" "=f" #'doom/clang-format-function)
   (map! :map c++-mode-map
         :localleader
         :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
         :desc "Format function" "=f" #'doom/clang-format-function)
 
 (defun doom/clang-format-function (&optional style)
-  "Format the current function with clang-format according to STYLE."
+  "Format the current function with clang-format according to STYLE.
+Works for standard C/C++ modes and Tree-sitter modes."
   (interactive)
   (save-excursion
-    (c-mark-function)
-    (clang-format (region-beginning) (region-end) style)
-    (deactivate-mark)
-    (message "Formatted function %s" (c-defun-name))))
+    (if (or (eq major-mode 'c-ts-mode)
+            (eq major-mode 'c++-ts-mode))
+        ;; Tree-sitter logic: Use treesit-defun-at-point
+        (let ((defun-node (treesit-defun-at-point)))
+          (if defun-node
+              (let ((start (treesit-node-start defun-node))
+                    (end (treesit-node-end defun-node)))
+                (clang-format start end style)
+                (message "Formatted function (Tree-sitter mode)"))
+            (user-error "Could not find function boundary (Tree-sitter)")))
+
+      ;; Standard C/C++ mode logic: Use c-mark-function
+      (c-mark-function)
+      (clang-format (region-beginning) (region-end) style)
+      (deactivate-mark)
+      (message "Formatted function %s" (c-defun-name)))))
 
 (defun doom/clang-format-region-or-buffer ()
   "Format the region if active, otherwise format the buffer."

@@ -153,6 +153,7 @@
           "C-c C-t" #'lsp-bridge-peek
           )
          )
+ )
 
 ;; (evil-define-key 'motion 'lsp-bridge-mode (kbd "C-]") 'lsp-bridge-find-def)
 (evil-define-key 'normal 'lsp-bridge-mode (kbd "g d") 'lsp-bridge-find-def)

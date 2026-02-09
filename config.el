@@ -661,6 +661,28 @@ Works for standard C/C++ modes and Tree-sitter modes."
   :config
   (map! :map eglot-mode-map
          :n "gr"  #'xref-find-references)
+  (setq eglot-ignored-server-capabilities
+        '(:hoverProvider
+          :signatureHelpProvider
+          ;; :definitionProvider
+          ;; :typeDefinitionProvider
+          ;; :implementationProvider
+          ;; :declarationProvider
+          ;; :referencesProvider
+          ;; :documentHighlightProvider
+          :documentSymbolProvider
+          :workspaceSymbolProvider
+          ;; :codeActionProvider
+          :codeLensProvider
+          :documentFormattingProvider
+          :documentRangeFormattingProvider
+          :documentOnTypeFormattingProvider
+          ;; :renameProvider
+          :documentLinkProvider
+          ;; :colorProvider
+          ;; :foldingRangeProvider
+          :executeCommandProvider
+          :inlayHintProvider))
   (add-to-list 'eglot-server-programs
                '((c-mode c-ts-mode c++-mode c++-ts-mode) .
                  ("clangd"

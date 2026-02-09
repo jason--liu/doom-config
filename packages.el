@@ -23,6 +23,7 @@
 (package! org-roam-ui)
 (package! go-translate :recipe (:host github :repo "lorniu/go-translate"))
 (package! leetcode)
+(package! eglot-inactive-regions :recipe (:host github :repo "fargiolas/eglot-inactive-regions"))
 ;; (package! treesit-auto)
 
 

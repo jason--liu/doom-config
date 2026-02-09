@@ -690,3 +690,9 @@ Works for standard C/C++ modes and Tree-sitter modes."
                   "--all-scopes-completion"
                   "--header-insertion=never"
                   "--header-insertion-decorators=0"))))
+(use-package! eglot-inactive-regions
+  :custom
+  (eglot-inactive-regions-style 'darken-foreground)
+  (eglot-inactive-regions-opacity 0.4)
+  :config
+  (eglot-inactive-regions-mode 1))

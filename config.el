@@ -533,6 +533,10 @@
         :localleader
         :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
         :desc "Format function" "=f" #'doom/clang-format-function)
+  (map! :map c++-ts-mode-map
+        :localleader
+        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
+        :desc "Format function" "=f" #'doom/clang-format-function)
 
 (defun doom/clang-format-function (&optional style)
   "Format the current function with clang-format according to STYLE.

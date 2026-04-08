@@ -243,7 +243,15 @@
   (quickrun-add-command "c/gcc"
     '((:exec . ("%c -x c -Wall -Werror %o -o %e %s"
                 "%e %a")))
-    :override t))
+    :override t)
+  (quickrun-add-command "cuda/nvcc"
+    '((:command . "/usr/local/cuda/bin/nvcc")
+      (:exec    . ("%c %o -o %e %s"
+                   "%e %a"))
+      (:remove  . ("%e")))
+    :default "cuda")
+  
+  (add-to-list 'quickrun-file-alist '("\\.cu$" . "cuda/nvcc")))
 
 (add-hook 'emacs-startup-hook
           (lambda ()
@@ -659,6 +667,22 @@ Works for standard C/C++ modes and Tree-sitter modes."
 (use-package! leetcode
   :config
 (setq leetcode-prefer-language "c")
+  )
+
+(use-package! magit
+  :config
+  (setq magit-revision-insert-related-refs nil)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-status-headers)
+
+  (defun run-projectile-invalidate-cache (&rest _args)
+    ;; We ignore the args to `magit-checkout'.
+    (projectile-invalidate-cache nil))
+  (advice-add 'magit-checkout
+              :after #'run-projectile-invalidate-cache)
+  (advice-add 'magit-branch-and-checkout ; This is `b c'.
+              :after #'run-projectile-invalidate-cache)
+  (advice-add 'magit-branch-checkout ; This is `b l'.
+              :after #'run-projectile-invalidate-cache)
   )
 
 (use-package! eglot

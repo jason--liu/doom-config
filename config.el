@@ -163,45 +163,6 @@
 (evil-define-key 'insert 'lsp-bridge-mode (kbd "C-j") 'acm-select-next)
 (evil-define-key 'insert 'lsp-bridge-mode (kbd "C-k") 'acm-select-prev)
 
-(defun my-c-common-font-lock-if0 (limit)
-  (save-restriction
-    (widen)
-    (save-excursion
-      (goto-char (point-min))
-      (let ((depth 0) str start start-depth)
-        ;; Search for #if, #else, #endif
-        (while (re-search-forward "^\\s-*#\\s-*\\(if\\|else\\|endif\\)" limit 'move)
-          (setq str (match-string 1))
-          (if (string= str "if")
-              (progn
-                (setq depth (1+ depth))
-                ;; Check if it is "#if 0"
-                (when (and (null start) (looking-at "\\s-+0"))
-                  (setq start (match-end 0)
-                        start-depth depth)))
-            (when (and start (= depth start-depth))
-              ;; CHANGE 1: Use standard 'put-text-property instead of c-put-font-lock-face
-              ;; We use 'face property directly, prepending to existing fontification
-              (put-text-property start (match-beginning 0) 'face 'font-lock-comment-face)
-              (setq start nil))
-            (when (string= str "endif")
-              (setq depth (1- depth)))))
-        (when (and start (> depth 0))
-          ;; CHANGE 2: Handle the unclosed block case
-          (put-text-property start (point) 'face 'font-lock-comment-face)))))
-  nil)
-
-(defun my-c-ts-mode-hook ()
-  ;; Add the keyword to c-ts-mode
-  (font-lock-add-keywords
-   nil
-   '((my-c-common-font-lock-if0 (0 font-lock-comment-face prepend)))
-   'add-to-end))
-
-;; Apply to c-ts-mode
-(add-hook 'c-ts-mode-hook 'my-c-ts-mode-hook)
-(add-hook 'c++-ts-mode-hook 'my-c-ts-mode-hook)
-
 (add-hook 'prog-mode-hook #'symbol-overlay-mode)
 
 (use-package! auto-save
@@ -209,19 +170,6 @@
   (auto-save-enable)
   (setq auto-save-slient t)
   )
-;; (use-package! super-save
-;;   :ensure t
-;;   :config
-;;   (setq auto-save-default nil)
-;;   ;; (setq super-save-idle-duration 1)
-;;   ;; (setq super-save-auto-save-when-idle t)
-;;   (add-to-list 'super-save-triggers 'evil-normal-state)
-;;   (add-to-list 'super-save-triggers 'ace-window)
-;;   (setq super-save-silent t)
-;;   (setq super-save-all-buffers t)
-;;   (setq super-save-delete-trailing-whitespace 'except-current-line)
-;;   (super-save-mode +1)
-;;   )
 
 (after! evil-escape
   (setq evil-escape-key-sequence "kj")

@@ -682,3 +682,6 @@ Works for standard C/C++ modes and Tree-sitter modes."
               (lambda ()
                 (when (string-match-p "\\.cu[h]?\\'" buffer-file-name)
                   (setq-local treesit-language-remap-alist '((cpp . cuda)))))))
+(after! autorevert
+  (setq auto-revert-avoid-polling t)
+  (setq auto-revert-use-notify t))

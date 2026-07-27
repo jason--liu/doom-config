@@ -672,19 +672,19 @@ Works for standard C/C++ modes and Tree-sitter modes."
   (eglot-inactive-regions-opacity 0.4)
   :config
   (eglot-inactive-regions-mode 1))
+
 (use-package! c-ts-mode
-    :config
-    (add-to-list 'auto-mode-alist '("\\.cu[h]?\\'" . c++-ts-mode)))
-(use-package! c-ts-mode
-    :config
-    (add-to-list 'auto-mode-alist '("\\.cu[h]?\\'" . c++-ts-mode))
-    (add-hook 'c++-ts-mode-hook
-              (lambda ()
-                (when (string-match-p "\\.cu[h]?\\'" buffer-file-name)
-                  (setq-local treesit-language-remap-alist '((cpp . cuda)))))))
+  :config
+  (add-to-list 'auto-mode-alist '("\\.cu[h]?\\'" . c++-ts-mode))
+  (add-hook 'c++-ts-mode-hook
+            (lambda ()
+              (when (string-match-p "\\.cu[h]?\\'" buffer-file-name)
+                (setq-local treesit-language-remap-alist '((cpp . cuda)))))))
+
 (after! autorevert
   (setq auto-revert-avoid-polling t)
   (setq auto-revert-use-notify t))
+
 (add-hook 'vterm-mode-hook
           (lambda ()
             (add-hook 'window-selection-change-functions

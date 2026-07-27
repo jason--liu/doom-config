@@ -692,3 +692,38 @@ Works for standard C/C++ modes and Tree-sitter modes."
                         (when (eq (window-buffer win) (current-buffer))
                           (evil-insert-state)))
                       nil t)))
+
+(defun my/quickrun-c-snippet ()
+  "Wrap the selected region (or current line) in a minimal C program,
+run it with quickrun, and keep the temp buffer invisible/cleaned up."
+  (interactive)
+  (let* ((code (if (use-region-p)
+                    (buffer-substring-no-properties (region-beginning) (region-end))
+                  (thing-at-point 'line t)))
+         (wrapped (concat "#include <stdio.h>\n"
+                           "#include <string.h>\n"
+                           "#include <stdlib.h>\n\n"
+                           "int main(void) {\n"
+                           code
+                           "\n    return 0;\n}\n"))
+         (tmpfile (make-temp-file "qr_snippet" nil ".c"))
+         (tmpbuf (find-file-noselect tmpfile)))
+    (with-current-buffer tmpbuf
+      (insert wrapped)
+      (save-buffer)
+      ;; Hide from buffer list: leading space = internal buffer
+      (rename-buffer (concat " *qr-snippet-" (file-name-nondirectory tmpfile) "*") t)
+      (quickrun)
+      ;; Clean up buffer + file once quickrun's process finishes
+      (letrec ((cleanup
+                (lambda (&rest _)
+                  (when (buffer-live-p tmpbuf)
+                    (kill-buffer tmpbuf))
+                  (when (file-exists-p tmpfile)
+                    (delete-file tmpfile))
+                  (remove-hook 'quickrun-after-run-hook cleanup))))
+        (add-hook 'quickrun-after-run-hook cleanup)))))
+
+(map! :leader
+      :desc "Quickrun C snippet"
+      "c q" #'my/quickrun-c-snippet)

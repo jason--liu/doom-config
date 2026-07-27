@@ -685,3 +685,10 @@ Works for standard C/C++ modes and Tree-sitter modes."
 (after! autorevert
   (setq auto-revert-avoid-polling t)
   (setq auto-revert-use-notify t))
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (add-hook 'window-selection-change-functions
+                      (lambda (win)
+                        (when (eq (window-buffer win) (current-buffer))
+                          (evil-insert-state)))
+                      nil t)))

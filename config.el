@@ -105,7 +105,15 @@
   (map!
    (:map prog-mode-map
          "M-]" #'citre-jump
-         "M-[" #'citre-jump-back)))
+         ;; "M-[" #'citre-jump-back
+         "C-x c p" #'citre-peek
+         )
+   (:map citre-peek-keymap
+         "C-l" #' citre-peek-next-tag
+         "C-h" #' citre-peek-prev-tag))
+  (setq citre-project-root-function #'projectile-project-root)
+  (custom-set-variables '(citre-find-definition-backends '(tags eglot)))
+  )
 
 (after! doom-modeline
   (setq  doom-modeline-buffer-file-name-style 'file-name)

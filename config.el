@@ -85,19 +85,6 @@
 (setq confirm-kill-emacs nil)
 (setq gdb-debuginfod-enable-setting nil)
 
-;; (use-package! lsp-bridge
-;;   :config
-;;   (setq lsp-bridge-enable-log nil)
-;;   (setq acm-candidate-match-function 'orderless-flex)
-;;   (setq lsp-bridge-find-def-fallback-function 'citre-jump)
-;;   (setq lsp-bridge-find-ref-fallback-function 'citre-jump-to-reference)
-;;   (setq lsp-bridge-default-mode-hooks
-;;         (remove 'org-mode-hook lsp-bridge-default-mode-hooks))
-;;   (setq lsp-bridge-default-mode-hooks
-;;         (remove 'emacs-lisp-mode-hook lsp-bridge-default-mode-hooks))
-;;   (add-hook! 'lsp-bridge-mode-hook (lambda () (corfu-mode -1)))
-;;   (global-lsp-bridge-mode))
-
 ;;TODO
 ;;https://www.skfwe.cn/p/citre-%E5%9C%A8emacs-%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/
 (use-package! citre
@@ -142,37 +129,6 @@
            "q" #'symbol-overlay-remove-all)
   )
 
-(map!
- (:after lsp-bridge
-         (:map lsp-bridge-peek-keymap
-               "C-h" #'lsp-bridge-peek-tree-previous-node
-               "C-j" #'lsp-bridge-peek-file-content-next-line
-               "C-k" #'lsp-bridge-peek-file-content-prev-line
-               "C-l" #'lsp-bridge-peek-tree-next-node
-               "C-n" #'lsp-bridge-peek-list-next-line
-               "C-p" #'lsp-bridge-peek-list-prev-line
-               "M-n" #'lsp-bridge-peek-tree-next-branch
-               "M-p" #'lsp-bridge-peek-tree-previous-branch
-               )
-
-         (
-          :map lsp-bridge-mode-map
-          "C-c C-p" #'lsp-bridge-peek-through
-          "C-c C-t" #'lsp-bridge-peek
-          )
-         )
- )
-
-;; (evil-define-key 'motion 'lsp-bridge-mode (kbd "C-]") 'lsp-bridge-find-def)
-(evil-define-key 'normal 'lsp-bridge-mode (kbd "g d") 'lsp-bridge-find-def)
-(evil-define-key 'normal 'lsp-bridge-mode (kbd "C-t") 'lsp-bridge-find-def-return)
-(evil-define-key 'normal 'lsp-bridge-mode (kbd "g r") 'lsp-bridge-find-references)
-(evil-define-key 'normal 'lsp-bridge-mode (kbd "K") 'lsp-bridge-popup-documentation)
-(evil-define-key 'insert 'lsp-bridge-mode (kbd "C-j") 'acm-select-next)
-(evil-define-key 'insert 'lsp-bridge-mode (kbd "C-k") 'acm-select-prev)
-
-(add-hook 'prog-mode-hook #'symbol-overlay-mode)
-
 (use-package! auto-save
   :config
   (auto-save-enable)
@@ -214,12 +170,6 @@
             (require 'yasnippet)
             (yas-global-mode 1)
 
-            ;; (require 'lsp-bridge)
-            ;; (global-lsp-bridge-mode)
-
-            ;; (unless (display-graphic-p)
-            ;;   (with-eval-after-load 'acm
-            ;;     (require 'acm-terminal)))
 	    ))
 
 ;; bury compilation windown

@@ -103,7 +103,7 @@
   )
 
 (after! doom-modeline
-  (setq  doom-modeline-buffer-file-name-style 'file-name)
+  (setq  doom-modeline-buffer-file-name-style 'relative-to-project)
   )
 
 
@@ -124,9 +124,6 @@
   (:prefix "c" ;code
   :desc "Comment line" "l" #'comment-line
   :desc "Comment/Copy line" "y" #'evilnc-copy-and-comment-lines )
-  (:prefix "i" ;insert
-           "o" #'symbol-overlay-put
-           "q" #'symbol-overlay-remove-all)
   )
 
 (use-package! auto-save
@@ -198,11 +195,6 @@
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode))
-
-;; (set-lookup-handlers! 'c-mode :async t
-;;     :definition #'lsp-bridge-find-def
-;;     ;;:implementations #'lsp-bridge-find-impl
-;;     )
 
  (global-auto-revert-mode 1)
 
@@ -589,15 +581,30 @@ Works for standard C/C++ modes and Tree-sitter modes."
               :after #'run-projectile-invalidate-cache)
   (advice-add 'magit-branch-checkout ; This is `b l'.
               :after #'run-projectile-invalidate-cache)
+  (advice-add 'magit-pull-from-upstream ; This is `F u'.
+              :after #'run-projectile-invalidate-cache)
   )
 
 (use-package! eglot
   :config
-  (map! :map eglot-mode-map
-         :n "gr"  #'xref-find-references)
+  ;; (map! :map eglot-mode-map
+  ;;       :n "gr"  #'xref-find-references
+  ;;       :n "C-t" #'better-jumper-jump-backward
+  ;;       :n "C-i" #'better-jumper-jump-forward
+  ;;       :i "C-i" #'complete-symbol
+  ;;       )
+  (add-hook 'eglot-managed-mode-hook
+            (lambda ()
+              (map! :map eglot-mode-map
+                    :n "gr"  #'xref-find-references
+                    :n "C-t" #'better-jumper-jump-backward
+                    :n "C-i" #'better-jumper-jump-forward
+                    :i "C-i" #'complete-symbol)
+              (evil-normalize-keymaps))
+            100)
   (setq eglot-ignored-server-capabilities
         '(:hoverProvider
-          :signatureHelpProvider
+          ;; :signatureHelpProvider
           ;; :definitionProvider
           ;; :typeDefinitionProvider
           ;; :implementationProvider
@@ -607,23 +614,26 @@ Works for standard C/C++ modes and Tree-sitter modes."
           :documentSymbolProvider
           :workspaceSymbolProvider
           ;; :codeActionProvider
-          :codeLensProvider
-          :documentFormattingProvider
-          :documentRangeFormattingProvider
-          :documentOnTypeFormattingProvider
+          ;; :codeLensProvider
+          ;; :documentFormattingProvider
+          ;; :documentRangeFormattingProvider
+          ;; :documentOnTypeFormattingProvider
           ;; :renameProvider
           :documentLinkProvider
           ;; :colorProvider
           ;; :foldingRangeProvider
           :executeCommandProvider
-          :inlayHintProvider))
+          :inlayHintProvider
+          ))
   (add-to-list 'eglot-server-programs
                '((c-mode c-ts-mode c++-mode c++-ts-mode) .
                  ("clangd"
                   "--clang-tidy"
                   "--all-scopes-completion"
                   "--header-insertion=never"
+                  "--completion-style=detailed"
                   "--header-insertion-decorators=0"))))
+
 (use-package! eglot-inactive-regions
   :custom
   (eglot-inactive-regions-style 'darken-foreground)
@@ -685,3 +695,31 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
 (map! :leader
       :desc "Quickrun C snippet"
       "c q" #'my/quickrun-c-snippet)
+
+(use-package! symbol-overlay
+  :hook (prog-mode . symbol-overlay-mode)
+  :init
+  (map! :leader
+        :desc "Toggle symbol overlay"
+        "i o" #'symbol-overlay-put
+        :desc "Remove all symbol overlay"
+        "i q" #'symbol-overlay-remove-all
+        )
+  :config
+  (map! :map symbol-overlay-map
+        "h" nil))
+
+(setq c-ts-mode-indent-style 'linux)
+
+(defun disable-y-or-n-p (orig-fun &rest args)
+  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
+    (apply orig-fun args)))
+
+(advice-add 'ediff-quit :around #'disable-y-or-n-p)
+
+(use-package! codex
+    :demand t
+    :init
+    (setq codex-terminal-backend 'vterm)
+    :config
+    (global-set-key (kbd "C-c x") codex-command-map))

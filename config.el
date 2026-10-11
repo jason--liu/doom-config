@@ -1,111 +1,29 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here! Remember, you do not need to run 'doom
-;; sync' after modifying this file!
+;; Private Doom configuration. Changes to this file do not require doom sync.
 
-
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets. It is optional.
-;; (setq user-full-name "John Doe"
-;;       user-mail-address "john@doe.com")
-
-;; Doom exposes five (optional) variables for controlling fonts in Doom:
-;;
-;; - `doom-font' -- the primary font to use
-;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
-;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;; - `doom-symbol-font' -- for symbols
-;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
-;;
-;; See 'C-h v doom-font' for documentation and more examples of what they
-;; accept. For example:
-;;
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
-;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+;;; Appearance and core settings
 
 (setq doom-font (font-spec :family "YaHei Consolas Hybrid" :size 30)
       doom-symbol-font (font-spec :family "TsangerJinKai03" :size 30))
-;;
-;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
-;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
-;; refresh your font settings. If Emacs still can't find your font, it likely
-;; wasn't installed correctly. Font issues are rarely Doom issues!
 
-;; There are two ways to load a theme. Both assume the theme is installed and
-;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one)
 
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq doom-themes-enable-italic nil)
+
 (setq display-line-numbers-type t)
-
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
-
-
-;; Whenever you reconfigure a package, make sure to wrap your config in an
-;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
-;;
-;;   (after! PACKAGE
-;;     (setq x y))
-;;
-;; The exceptions to this rule:
-;;
-;;   - Setting file/directory variables (like `org-directory')
-;;   - Setting variables which explicitly tell you to set them before their
-;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
-;;   - Setting doom variables (which start with 'doom-' or '+').
-;;
-;; Here are some additional functions/macros that will help you configure Doom.
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
-;; - `after!' for running code after a package has loaded
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
-;; etc).
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
 
 (setq nerd-icons-font-names '("SymbolsNerdFont-Regular.ttf"))
 
 (setq doom-localleader-key ",")
 
 (setq confirm-kill-emacs nil)
-(setq gdb-debuginfod-enable-setting nil)
-
-;;TODO
-;;https://www.skfwe.cn/p/citre-%E5%9C%A8emacs-%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/
-(use-package! citre
-  :config
-  (map!
-   (:map prog-mode-map
-         "M-]" #'citre-jump
-         ;; "M-[" #'citre-jump-back
-         "C-x c p" #'citre-peek
-         )
-   (:map citre-peek-keymap
-         "C-l" #' citre-peek-next-tag
-         "C-h" #' citre-peek-prev-tag))
-  (setq citre-project-root-function #'projectile-project-root)
-  (custom-set-variables '(citre-find-definition-backends '(tags eglot)))
-  )
 
 (after! doom-modeline
-  (setq  doom-modeline-buffer-file-name-style 'relative-to-project)
-  )
+  (setq doom-modeline-buffer-file-name-style 'relative-to-project))
 
+
+;;; Editing, navigation, and files
 
 (use-package! consult
   :config
@@ -117,20 +35,17 @@
    +default/search-cwd +default/search-other-cwd
    +default/search-notes-for-symbol-at-point
    +default/search-emacsd
-   :preview-key '(:debounce 0.2 any))
-  )
+   :preview-key '(:debounce 0.2 any)))
 
 (map! :leader
-  (:prefix "c" ;code
-  :desc "Comment line" "l" #'comment-line
-  :desc "Comment/Copy line" "y" #'evilnc-copy-and-comment-lines )
-  )
+  (:prefix "c" ;; Code
+           :desc "Comment line" "l" #'comment-line
+           :desc "Comment/Copy line" "y" #'evilnc-copy-and-comment-lines))
 
 (use-package! auto-save
   :config
   (auto-save-enable)
-  (setq auto-save-slient t)
-  )
+  (setq auto-save-slient t))
 
 (after! evil-escape
   (setq evil-escape-key-sequence "kj")
@@ -138,15 +53,73 @@
   (delete 'visual evil-escape-excluded-states)
   (setq-default evil-escape-delay 0.5)
   (setq evil-escape-excluded-major-modes '(dired-mode))
-  (setq evil-escape-excluded-major-modes (list 'magit-status-mode 'magit-refs-mode 'magit-log-mode 'magit-revision-mode 'compilation-mode 'magit-stash-mode))
-  (evil-escape-mode 1)
-  )
+  (setq evil-escape-excluded-major-modes
+        (list 'magit-status-mode
+              'magit-refs-mode
+              'magit-log-mode
+              'magit-revision-mode
+              'compilation-mode
+              'magit-stash-mode))
+  (evil-escape-mode 1))
+
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (require 'yasnippet)
+            (yas-global-mode 1)))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
+(global-auto-revert-mode 1)
+
+(after! autorevert
+  (setq auto-revert-avoid-polling t)
+  (setq auto-revert-use-notify t))
+
+(use-package! expand-region
+  :config
+  (setq expand-region-contract-fast-key "z")
+  ;; Bind in visual mode using map!
+  (map! :v "v" #'er/expand-region))
+
+(use-package! ace-window
+  :config
+  (global-set-key (kbd "M-o") 'ace-window))
+
+(use-package! symbol-overlay
+  :hook (prog-mode . symbol-overlay-mode)
+  :init
+  (map! :leader
+    :desc "Toggle symbol overlay"
+    "i o" #'symbol-overlay-put
+    :desc "Remove all symbol overlay"
+    "i q" #'symbol-overlay-remove-all)
+  :config
+  (map! :map symbol-overlay-map
+    "h" nil))
+
+
+;;; C/C++, compilation, and code navigation
+
+(use-package! citre
+  :config
+  (map!
+    (:map prog-mode-map
+          "M-]" #'citre-jump
+          ;; "M-[" #'citre-jump-back
+          "C-x c p" #'citre-peek)
+    (:map citre-peek-keymap
+          "C-l" #'citre-peek-next-tag
+          "C-h" #'citre-peek-prev-tag))
+  (setq citre-project-root-function #'projectile-project-root)
+  (custom-set-variables '(citre-find-definition-backends '(tags eglot))))
 
 (setq smart-compile-alist
       '(("\\.c\\'" . "gcc -g -Wall %f -o %n.bin")
-        ("\\.[Cc]+[Pp]*\\'" . "g++ -g -Wall %f  -o %n.bin")
-        )
-      )
+        ("\\.[Cc]+[Pp]*\\'" . "g++ -g -Wall %f  -o %n.bin")))
 
 (after! quickrun
   (quickrun-add-command "c/gcc"
@@ -159,17 +132,9 @@
                    "%e %a"))
       (:remove  . ("%e")))
     :default "cuda")
-  
+
   (add-to-list 'quickrun-file-alist '("\\.cu$" . "cuda/nvcc")))
 
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (require 'yasnippet)
-            (yas-global-mode 1)
-
-	    ))
-
-;; bury compilation windown
 (defun bury-compile-buffer-if-successful (buffer string)
   "Bury a compilation buffer if it succeeded without warnings or errors."
   (when (and (buffer-live-p buffer)
@@ -177,8 +142,8 @@
              (string-match-p "finished" string)
              (not (with-current-buffer buffer
                     (goto-char (point-min))
-                    (or(search-forward "warning" nil t)
-                       (search-forward "error" nil t)))))
+                    (or (search-forward "warning" nil t)
+                        (search-forward "error" nil t)))))
     (run-with-timer
      1 nil
      (lambda ()
@@ -189,15 +154,178 @@
 
 (add-hook 'compilation-finish-functions #'bury-compile-buffer-if-successful)
 
+(use-package! clang-format
+  :defer t)
 
-(use-package dired-hide-dotfiles
-  :hook (dired-mode . dired-hide-dotfiles-mode)
+(map! :map c-mode-map
+  :localleader
+  :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
+  :desc "Format function" "=f" #'doom/clang-format-function)
+
+(map! :map c-ts-mode-map
+  :localleader
+  :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
+  :desc "Format function" "=f" #'doom/clang-format-function)
+
+(map! :map c++-mode-map
+  :localleader
+  :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
+  :desc "Format function" "=f" #'doom/clang-format-function)
+
+(map! :map c++-ts-mode-map
+  :localleader
+  :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
+  :desc "Format function" "=f" #'doom/clang-format-function)
+
+(defun doom/clang-format-function (&optional style)
+  "Format the current function with clang-format according to STYLE.
+Works for standard C/C++ modes and Tree-sitter modes."
+  (interactive)
+  (save-excursion
+    (if (or (eq major-mode 'c-ts-mode)
+            (eq major-mode 'c++-ts-mode))
+        ;; Tree-sitter logic: Use treesit-defun-at-point
+        (let ((defun-node (treesit-defun-at-point)))
+          (if defun-node
+              (let ((start (treesit-node-start defun-node))
+                    (end (treesit-node-end defun-node)))
+                (clang-format start end style)
+                (message "Formatted function (Tree-sitter mode)"))
+            (user-error "Could not find function boundary (Tree-sitter)")))
+
+      ;; Standard C/C++ mode logic: Use c-mark-function
+      (c-mark-function)
+      (clang-format (region-beginning) (region-end) style)
+      (deactivate-mark)
+      (message "Formatted function %s" (c-defun-name)))))
+
+(defun doom/clang-format-region-or-buffer ()
+  "Format the region if active, otherwise format the buffer."
+  (interactive)
+  (if (use-region-p)
+      (clang-format-region (region-beginning) (region-end))
+    (clang-format-buffer)))
+
+(add-hook 'after-init-hook #'breadcrumb-mode)
+
+(defun my/asm-comment-tweak ()
+  (setq-local comment-start "// "))
+
+(eval-after-load "asm"
+  (add-hook 'asm-mode-hook #'my/asm-comment-tweak))
+
+(use-package! eglot
   :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
+  (add-hook 'eglot-managed-mode-hook
+            (lambda ()
+              (map! :map eglot-mode-map
+                :n "gr"  #'xref-find-references
+                :n "C-t" #'better-jumper-jump-backward
+                :n "C-i" #'better-jumper-jump-forward
+                :i "C-i" #'complete-symbol)
+              (evil-normalize-keymaps))
+            100)
+  (setq eglot-ignored-server-capabilities
+        '(:hoverProvider
+          :documentSymbolProvider
+          :workspaceSymbolProvider
+          :documentLinkProvider
+          :executeCommandProvider
+          :inlayHintProvider))
+  (add-to-list 'eglot-server-programs
+               '((c-mode c-ts-mode c++-mode c++-ts-mode) .
+                 ("clangd"
+                  "--clang-tidy"
+                  "--all-scopes-completion"
+                  "--header-insertion=never"
+                  "--completion-style=detailed"
+                  "--header-insertion-decorators=0"))))
 
- (global-auto-revert-mode 1)
+(use-package! eglot-inactive-regions
+  :custom
+  (eglot-inactive-regions-style 'darken-foreground)
+  (eglot-inactive-regions-opacity 0.4)
+  :config
+  (eglot-inactive-regions-mode 1))
 
+(use-package! c-ts-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.cu[h]?\\'" . c++-ts-mode))
+  (add-hook 'c++-ts-mode-hook
+            (lambda ()
+              (when (string-match-p "\\.cu[h]?\\'" buffer-file-name)
+                (setq-local treesit-language-remap-alist '((cpp . cuda)))))))
+
+(setq c-ts-mode-indent-style 'linux)
+
+(defun my/quickrun-c-snippet ()
+  "Wrap the selected region (or current line) in a minimal C program,
+run it with quickrun, and keep the temp buffer invisible/cleaned up."
+  (interactive)
+  (let* ((code (if (use-region-p)
+                   (buffer-substring-no-properties (region-beginning) (region-end))
+                 (thing-at-point 'line t)))
+         (wrapped (concat "#include <stdio.h>\n"
+                          "#include <string.h>\n"
+                          "#include <stdlib.h>\n\n"
+                          "int main(void) {\n"
+                          code
+                          "\n    return 0;\n}\n"))
+         (tmpfile (make-temp-file "qr_snippet" nil ".c"))
+         (tmpbuf (find-file-noselect tmpfile)))
+    (with-current-buffer tmpbuf
+      (insert wrapped)
+      (save-buffer)
+      ;; Hide from buffer list: leading space = internal buffer
+      (rename-buffer (concat " *qr-snippet-" (file-name-nondirectory tmpfile) "*") t)
+      (quickrun)
+      ;; Clean up buffer + file once quickrun's process finishes
+      (letrec ((cleanup
+                (lambda (&rest _)
+                  (when (buffer-live-p tmpbuf)
+                    (kill-buffer tmpbuf))
+                  (when (file-exists-p tmpfile)
+                    (delete-file tmpfile))
+                  (remove-hook 'quickrun-after-run-hook cleanup))))
+        (add-hook 'quickrun-after-run-hook cleanup)))))
+
+(map! :leader
+  :desc "Quickrun C snippet"
+  "c q" #'my/quickrun-c-snippet)
+
+(use-package! leetcode
+  :config
+  (setq leetcode-prefer-language "c"))
+
+
+;;; Debugging
+
+(setq gdb-debuginfod-enable-setting nil)
+
+(defun my-gud-mode-exit ()
+  "Exit GUD mode and delete the window."
+  (interactive)
+  (let ((debugger-buffer (current-buffer))
+        (debugger-window (selected-window)))
+    (quit-window)
+    (delete-window debugger-window)
+    (kill-buffer debugger-buffer)
+    (gud-basic-call "quit")))
+
+(add-hook 'gud-mode-hook
+          (lambda ()
+            (local-set-key (kbd "q") 'my-gud-mode-exit)))
+
+(use-package! dape
+  :config
+  ;; (setq dape-buffer-window-arrangement 'right)
+  (add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line)
+  (setq completion-in-region-function #'corfu--in-region))
+
+
+;;; Org, capture, and notes
+
+(setq org-directory "~/org/")
 
 (after! org
   (setq org-todo-keyword-faces '(("TODO" . "red")
@@ -211,8 +339,7 @@
                                  (file+datetree "~/Dropbox/org/journal/journal-2025.org")
                                  "* %U - %^{heading} %^g\n %?\n")
                                 ("n" "Notes" entry (file "~/Dropbox/org/inbox.org")
-                                 "* %^{heading}  %^g\n  %?\n")
-                                ))
+                                 "* %^{heading}  %^g\n  %?\n")))
   (add-hook 'org-mode-hook 'org-download-enable)
   ;; hidden org-download annotation
   (setq org-download-annotate-function (lambda (_link) ""))
@@ -269,64 +396,10 @@
        :strike-through "#972500" :foreground "#505050")
       (((class color) (min-colors 88) (background dark))
        :strike-through "#ef8b50" :foreground "#a8a8a8"))
-    "My strike-through emphasis for Org.")
-  )
+    "My strike-through emphasis for Org."))
 
-(use-package! rime
-  :defer t
-  :custom
-  (rime-user-data-dir (expand-file-name "~/.config/emacs-rime/"))
-  (default-input-method "rime")
-  (rime-show-candidate 'posframe)
-  ;; (setq rime-disable-predicates
-  ;;  '(rime-predicate-evil-mode-p
-  ;;    rime-predicate-after-alphabet-char-p
-  ;;    rime-predicate-prog-in-code-p))
- (rime-disable-predicates
-   '(rime-predicate-prog-in-code-p
-     rime-predicate-auto-english-p
-     rime-predicate-punctuation-after-ascii-p
-     rime-predicate-punctuation-line-begin-p
-     rime-predicate-current-uppercase-letter-p))
-  :config
-  (custom-set-faces!
-    `(rime-default-face :background ,(doom-blend 'blue 'base0 0.15)))
-  (define-key rime-mode-map (kbd "C-;") 'rime-force-enable)
-(defun rime-evil-escape-advice (orig-fun key)
-  "advice for `rime-input-method' to make it work together with `evil-escape'.
-        Mainly modified from `evil-escape-pre-command-hook'"
-  (if rime--preedit-overlay
-      ;; if `rime--preedit-overlay' is non-nil, then we are editing something, do not abort
-      (apply orig-fun (list key))
-    (when (featurep 'evil-escape)
-      (let (
-            (fkey (elt evil-escape-key-sequence 0))
-            (skey (elt evil-escape-key-sequence 1))
-            )
-        (if (or (char-equal key fkey)
-                (and evil-escape-unordered-key-sequence
-                     (char-equal key skey)))
-            (let ((evt (read-event nil nil evil-escape-delay)))
-              (cond
-               ((and (characterp evt)
-                     (or (and (char-equal key fkey) (char-equal evt skey))
-                         (and evil-escape-unordered-key-sequence
-                              (char-equal key skey) (char-equal evt fkey))))
-                (evil-repeat-stop)
-                (evil-normal-state))
-               ((null evt) (apply orig-fun (list key)))
-               (t
-                (apply orig-fun (list key))
-                (if (numberp evt)
-                    (apply orig-fun (list evt))
-                  (setq unread-command-events (append unread-command-events (list evt))))))
-              )
-          (apply orig-fun (list key)))))))
+(require 'org-tempo)
 
-(advice-add 'rime-input-method :around #'rime-evil-escape-advice)
-  )
-
-;;org
 (after! org-roam
   (setq org-roam-directory "~/Dropbox/org/roam/")
   (setq org-agenda-files '("~/Dropbox/org/gtd.org"))
@@ -340,14 +413,12 @@
   (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
     (let* ((count (caar (org-roam-db-query
                          [:select (funcall count source)
-                          :from links
-                          :where (= dest $s1)
-                          :and (= type "id")]
+                                  :from links
+                                  :where (= dest $s1)
+                                  :and (= type "id")]
                          (org-roam-node-id node)))))
       (format "[%d]" count)))
   (setq org-roam-node-display-template "${directories:10} ${tags:10} ${title:50} ${backlinkscount:6}")
-  ;; hides the emphasis markers
-  ;; (setq org-hide-emphasis-markers t)
   (defun org-roam-node-insert-immediate (arg &rest args)
     (interactive "P")
     (let ((args (cons arg args))
@@ -355,217 +426,103 @@
                                                     '(:immediate-finish t)))))
       (apply #'org-roam-node-insert args)))
 
+  (setq org-roam-mode-sections
+        (list #'org-roam-backlinks-section
+              #'org-roam-reflinks-section
+              'org-roam-unlinked-references-section)))
 
-;; (setq org-roam-mode-sections
-;;       '((org-roam-backlinks-section :unique t)
-;;         org-roam-reflinks-section))
-
-(setq org-roam-mode-sections
-      (list #'org-roam-backlinks-section
-            #'org-roam-reflinks-section
-            'org-roam-unlinked-references-section
-            ))
-  )
-
-(defun my/open-org-inbox-file()
+(defun my/open-org-inbox-file ()
   "Open ~/Dropbox/org/inbox.org file"
   (interactive)
   (find-file "~/Dropbox/org/inbox.org"))
+
 (global-set-key (kbd "<f12>") 'my/open-org-inbox-file)
 
-(defun my/open-org-journal-file()
+(defun my/open-org-journal-file ()
   "Open ~/Dropbox/org/journal/journal-2025.org file"
   (interactive)
   (find-file "~/Dropbox/org/journal/journal-2025.org"))
-(global-set-key (kbd "<f9>") 'my/open-org-journal-file)
 
+(global-set-key (kbd "<f9>") 'my/open-org-journal-file)
 
 (after! deft
   (setq deft-recursive t
         deft-directory "~/Dropbox/org/roam/"
         deft-strip-summary-regexp ":PROPERTIES:\n\\(.+\n\\)+:END:\n"
-        deft-use-filename-as-title 't
-        )
-  )
-
-;; (use-package! treesit
-;;   :config (setq treesit-font-lock-level 4)
-;;   :init
-;;   (setq treesit-language-source-alist
-;;     '((elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
-;;       (bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
-;;       (c       . ("https://github.com/tree-sitter/tree-sitter-c"))
-;;       (cpp       . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-;;       ))
-;;   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
-;;   (add-to-list 'auto-mode-alist '("\\.c\\'" . c-ts-mode))
-;;   )
-
-;; (use-package! treesit-auto
-;;   :demand
-;;   :init
-;;   (progn
-;;     (setq treesit-font-lock-level 4)
-;;     (setq c-ts-mode-hook c-mode-common-hook)
-;; ;;    (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
-;;     )
-;;   :config
-;;   (global-treesit-auto-mode)
-;;   )
-
-(use-package! expand-region
-  :config
-  (setq expand-region-contract-fast-key "z")
-  ;; Bind in visual mode using map!
-  (map! :v "v" #'er/expand-region))
-
-
-(use-package! clang-format
-  :defer t
-  ;; :config
-  ;; (setq clang-format-style "llvm")
-  )
-
-  ;; Keybindings for formatting in C/C++ modes
-  (map! :map c-mode-map
-        :localleader
-        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
-        :desc "Format function" "=f" #'doom/clang-format-function)
-  (map! :map c-ts-mode-map
-        :localleader
-        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
-        :desc "Format function" "=f" #'doom/clang-format-function)
-  (map! :map c++-mode-map
-        :localleader
-        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
-        :desc "Format function" "=f" #'doom/clang-format-function)
-  (map! :map c++-ts-mode-map
-        :localleader
-        :desc "Format region or buffer" "=r" #'doom/clang-format-region-or-buffer
-        :desc "Format function" "=f" #'doom/clang-format-function)
-
-(defun doom/clang-format-function (&optional style)
-  "Format the current function with clang-format according to STYLE.
-Works for standard C/C++ modes and Tree-sitter modes."
-  (interactive)
-  (save-excursion
-    (if (or (eq major-mode 'c-ts-mode)
-            (eq major-mode 'c++-ts-mode))
-        ;; Tree-sitter logic: Use treesit-defun-at-point
-        (let ((defun-node (treesit-defun-at-point)))
-          (if defun-node
-              (let ((start (treesit-node-start defun-node))
-                    (end (treesit-node-end defun-node)))
-                (clang-format start end style)
-                (message "Formatted function (Tree-sitter mode)"))
-            (user-error "Could not find function boundary (Tree-sitter)")))
-
-      ;; Standard C/C++ mode logic: Use c-mark-function
-      (c-mark-function)
-      (clang-format (region-beginning) (region-end) style)
-      (deactivate-mark)
-      (message "Formatted function %s" (c-defun-name)))))
-
-(defun doom/clang-format-region-or-buffer ()
-  "Format the region if active, otherwise format the buffer."
-  (interactive)
-  (if (use-region-p)
-      (clang-format-region (region-beginning) (region-end))
-    (clang-format-buffer)))
-
-(add-hook 'after-init-hook #'breadcrumb-mode)
-(require 'org-tempo)
-
-(add-hook 'gud-mode-hook
-              (lambda ()
-                (local-set-key (kbd "q") 'my-gud-mode-exit)))
-(defun my-gud-mode-exit ()
-      "Exit GUD mode and delete the window."
-      (interactive)
-      (let ((debugger-buffer (current-buffer))
-            (debugger-window (selected-window)))
-        (quit-window)
-        (delete-window debugger-window)
-        (kill-buffer debugger-buffer)
-        (gud-basic-call "quit")))
-
-(add-hook 'gud-mode-hook
-          (lambda ()
-            (local-set-key (kbd "q") 'my-gud-mode-exit)))
-
-(defun my/asm-comment-tweak ()
-  (setq-local comment-start "// "))
-
-(eval-after-load "asm"
-  (add-hook 'asm-mode-hook #'my/asm-comment-tweak))
-
-(use-package! ace-window
-  :config
-  (global-set-key (kbd "M-o") 'ace-window)
-  )
+        deft-use-filename-as-title 't))
 
 (use-package! org-media-note
-  :hook (org-mode .  org-media-note-mode)
-  :bind (
-         ("M-m" . org-media-note-show-interface))  ;; 主功能入口
+  :hook (org-mode . org-media-note-mode)
+  :bind (("M-m" . org-media-note-show-interface))  ;; 主功能入口
   :config
   (setq org-media-note-screenshot-image-dir "~/Dropbox/org/roam/org-media-imgs/")  ;; 用于存储视频截图的目录
   (add-to-list 'org-media-note-mpv-online-website-options-alist
                '("\\(youtube\\.com\\|youtu\\.be\\)"
-                 "--ytdl-raw-options=proxy=http://127.0.0.1:7788"
-                 ))
+                 "--ytdl-raw-options=proxy=http://127.0.0.1:7788"))
   (add-to-list 'org-media-note-mpv-online-website-options-alist
                '("\\(bilibili\\.com\\)"
                  "--referrer=https://www.bilibili.com"
-                 "--ytdl-raw-options=cookies-from-browser=[chrome]"))
-  ;; (add-to-list 'org-media-note-mpv-general-options
-  ;;              "--log-file=/tmp/mpv.log")
-
-  )
+                 "--ytdl-raw-options=cookies-from-browser=[chrome]")))
 
 (use-package! org-roam-ui
-    :after org-roam
-    :config
-    (setq
-     org-roam-ui-sync-theme nil
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
-
-;; (use-package! go-translate
-;;   :config
-;;   (map! (:map gt-overlay-render-map
-;;               "C-g" #'gt-delete-render-overlays
-;;               ))
-;;   (setq gt-source-text-transformer
-;;         (lambda (c engine )
-;;           (string-replace "\n" " " c)))
-;;   (setq gt-langs '(en zh))
-;;   (setq gt-default-translator
-;;         (gt-translator
-;;          :taker   (list (gt-taker :pick nil :if 'selection)
-;;                         (gt-taker :text 'paragraph :if '(Info-mode help-mode))
-;;                         (gt-taker :text 'buffer :pick 'fresh-word :if 'read-only)
-;;                         (gt-taker :text 'word))
-;;          :engines (list (gt-youdao-dict-engine :if 'word)
-;;                         (gt-bing-engine :if 'no-word))
-;;          :render  (list (gt-overlay-render :if 'selection)
-;;                         (gt-overlay-render :if 'read-only)
-;;                         (gt-insert-render :if (lambda (translator) (member (buffer-name) '("COMMIT_EDITMSG"))))
-;;                         ;; (gt-alert-render :if '(and xxx-mode (or not-selection (and read-only parts))))
-;;                         (gt-buffer-render :if 'word))))
-;;   )
-
-(use-package! dape
+  :after org-roam
   :config
-  ;; (setq dape-buffer-window-arrangement 'right)
-(add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line)
-  )
+  (setq org-roam-ui-sync-theme nil
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
-(use-package! leetcode
+
+;;; Input method
+
+(use-package! rime
+  :defer t
+  :custom
+  (rime-user-data-dir (expand-file-name "~/.config/emacs-rime/"))
+  (default-input-method "rime")
+  (rime-show-candidate 'posframe)
+  (rime-disable-predicates
+   '(rime-predicate-prog-in-code-p
+     rime-predicate-auto-english-p
+     rime-predicate-punctuation-after-ascii-p
+     rime-predicate-punctuation-line-begin-p
+     rime-predicate-current-uppercase-letter-p))
   :config
-(setq leetcode-prefer-language "c")
-  )
+  (custom-set-faces!
+    `(rime-default-face :background ,(doom-blend 'blue 'base0 0.15)))
+  (define-key rime-mode-map (kbd "C-;") 'rime-force-enable)
+  (defun rime-evil-escape-advice (orig-fun key)
+    "advice for `rime-input-method' to make it work together with `evil-escape'.
+        Mainly modified from `evil-escape-pre-command-hook'"
+    (if rime--preedit-overlay
+        ;; if `rime--preedit-overlay' is non-nil, then we are editing something, do not abort
+        (apply orig-fun (list key))
+      (when (featurep 'evil-escape)
+        (let ((fkey (elt evil-escape-key-sequence 0))
+              (skey (elt evil-escape-key-sequence 1)))
+          (if (or (char-equal key fkey)
+                  (and evil-escape-unordered-key-sequence
+                       (char-equal key skey)))
+              (let ((evt (read-event nil nil evil-escape-delay)))
+                (cond
+                 ((and (characterp evt)
+                       (or (and (char-equal key fkey) (char-equal evt skey))
+                           (and evil-escape-unordered-key-sequence
+                                (char-equal key skey) (char-equal evt fkey))))
+                  (evil-repeat-stop)
+                  (evil-normal-state))
+                 ((null evt) (apply orig-fun (list key)))
+                 (t
+                  (apply orig-fun (list key))
+                  (if (numberp evt)
+                      (apply orig-fun (list evt))
+                    (setq unread-command-events (append unread-command-events (list evt)))))))
+            (apply orig-fun (list key)))))))
+
+  (advice-add 'rime-input-method :around #'rime-evil-escape-advice))
+
+
+;;; Version control and diffs
 
 (use-package! magit
   :config
@@ -582,76 +539,16 @@ Works for standard C/C++ modes and Tree-sitter modes."
   (advice-add 'magit-branch-checkout ; This is `b l'.
               :after #'run-projectile-invalidate-cache)
   (advice-add 'magit-pull-from-upstream ; This is `F u'.
-              :after #'run-projectile-invalidate-cache)
-  )
+              :after #'run-projectile-invalidate-cache))
 
-(use-package! eglot
-  :config
-  ;; (map! :map eglot-mode-map
-  ;;       :n "gr"  #'xref-find-references
-  ;;       :n "C-t" #'better-jumper-jump-backward
-  ;;       :n "C-i" #'better-jumper-jump-forward
-  ;;       :i "C-i" #'complete-symbol
-  ;;       )
-  (add-hook 'eglot-managed-mode-hook
-            (lambda ()
-              (map! :map eglot-mode-map
-                    :n "gr"  #'xref-find-references
-                    :n "C-t" #'better-jumper-jump-backward
-                    :n "C-i" #'better-jumper-jump-forward
-                    :i "C-i" #'complete-symbol)
-              (evil-normalize-keymaps))
-            100)
-  (setq eglot-ignored-server-capabilities
-        '(:hoverProvider
-          ;; :signatureHelpProvider
-          ;; :definitionProvider
-          ;; :typeDefinitionProvider
-          ;; :implementationProvider
-          ;; :declarationProvider
-          ;; :referencesProvider
-          ;; :documentHighlightProvider
-          :documentSymbolProvider
-          :workspaceSymbolProvider
-          ;; :codeActionProvider
-          ;; :codeLensProvider
-          ;; :documentFormattingProvider
-          ;; :documentRangeFormattingProvider
-          ;; :documentOnTypeFormattingProvider
-          ;; :renameProvider
-          :documentLinkProvider
-          ;; :colorProvider
-          ;; :foldingRangeProvider
-          :executeCommandProvider
-          :inlayHintProvider
-          ))
-  (add-to-list 'eglot-server-programs
-               '((c-mode c-ts-mode c++-mode c++-ts-mode) .
-                 ("clangd"
-                  "--clang-tidy"
-                  "--all-scopes-completion"
-                  "--header-insertion=never"
-                  "--completion-style=detailed"
-                  "--header-insertion-decorators=0"))))
+(defun disable-y-or-n-p (orig-fun &rest args)
+  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
+    (apply orig-fun args)))
 
-(use-package! eglot-inactive-regions
-  :custom
-  (eglot-inactive-regions-style 'darken-foreground)
-  (eglot-inactive-regions-opacity 0.4)
-  :config
-  (eglot-inactive-regions-mode 1))
+(advice-add 'ediff-quit :around #'disable-y-or-n-p)
 
-(use-package! c-ts-mode
-  :config
-  (add-to-list 'auto-mode-alist '("\\.cu[h]?\\'" . c++-ts-mode))
-  (add-hook 'c++-ts-mode-hook
-            (lambda ()
-              (when (string-match-p "\\.cu[h]?\\'" buffer-file-name)
-                (setq-local treesit-language-remap-alist '((cpp . cuda)))))))
 
-(after! autorevert
-  (setq auto-revert-avoid-polling t)
-  (setq auto-revert-use-notify t))
+;;; Terminals and Codex
 
 (add-hook 'vterm-mode-hook
           (lambda ()
@@ -661,65 +558,9 @@ Works for standard C/C++ modes and Tree-sitter modes."
                           (evil-insert-state)))
                       nil t)))
 
-(defun my/quickrun-c-snippet ()
-  "Wrap the selected region (or current line) in a minimal C program,
-run it with quickrun, and keep the temp buffer invisible/cleaned up."
-  (interactive)
-  (let* ((code (if (use-region-p)
-                    (buffer-substring-no-properties (region-beginning) (region-end))
-                  (thing-at-point 'line t)))
-         (wrapped (concat "#include <stdio.h>\n"
-                           "#include <string.h>\n"
-                           "#include <stdlib.h>\n\n"
-                           "int main(void) {\n"
-                           code
-                           "\n    return 0;\n}\n"))
-         (tmpfile (make-temp-file "qr_snippet" nil ".c"))
-         (tmpbuf (find-file-noselect tmpfile)))
-    (with-current-buffer tmpbuf
-      (insert wrapped)
-      (save-buffer)
-      ;; Hide from buffer list: leading space = internal buffer
-      (rename-buffer (concat " *qr-snippet-" (file-name-nondirectory tmpfile) "*") t)
-      (quickrun)
-      ;; Clean up buffer + file once quickrun's process finishes
-      (letrec ((cleanup
-                (lambda (&rest _)
-                  (when (buffer-live-p tmpbuf)
-                    (kill-buffer tmpbuf))
-                  (when (file-exists-p tmpfile)
-                    (delete-file tmpfile))
-                  (remove-hook 'quickrun-after-run-hook cleanup))))
-        (add-hook 'quickrun-after-run-hook cleanup)))))
-
-(map! :leader
-      :desc "Quickrun C snippet"
-      "c q" #'my/quickrun-c-snippet)
-
-(use-package! symbol-overlay
-  :hook (prog-mode . symbol-overlay-mode)
-  :init
-  (map! :leader
-        :desc "Toggle symbol overlay"
-        "i o" #'symbol-overlay-put
-        :desc "Remove all symbol overlay"
-        "i q" #'symbol-overlay-remove-all
-        )
-  :config
-  (map! :map symbol-overlay-map
-        "h" nil))
-
-(setq c-ts-mode-indent-style 'linux)
-
-(defun disable-y-or-n-p (orig-fun &rest args)
-  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
-    (apply orig-fun args)))
-
-(advice-add 'ediff-quit :around #'disable-y-or-n-p)
-
 (use-package! codex
-    :demand t
-    :init
-    (setq codex-terminal-backend 'vterm)
-    :config
-    (global-set-key (kbd "C-c x") codex-command-map))
+  :demand t
+  :init
+  (setq codex-terminal-backend 'vterm)
+  :config
+  (global-set-key (kbd "C-c x") codex-command-map))

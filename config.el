@@ -67,6 +67,11 @@
             (require 'yasnippet)
             (yas-global-mode 1)))
 
+(after! yasnippet
+  (setq yas-snippet-dirs
+        (list (expand-file-name "snippets/" doom-user-dir)))
+  (yas-reload-all))
+
 (use-package dired-hide-dotfiles
   :hook (dired-mode . dired-hide-dotfiles-mode)
   :config

@@ -20,6 +20,8 @@
 (package! auto-save :recipe (:host github :repo "manateelazycat/auto-save"))
 (package! doom-snippets :disable t)
 (package! org-appear)
+(package! markdown-ts-appear
+  :recipe (:host github :repo "Thysrael/markdown-ts-appear"))
 (package! org-media-note :recipe (:host github :repo "yuchen-lea/org-media-note"))
 (package! org-roam-ui)
 (package! go-translate :recipe (:host github :repo "lorniu/go-translate"))

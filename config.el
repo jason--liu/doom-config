@@ -344,6 +344,12 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
   (setq completion-in-region-function #'corfu--in-region))
 
 
+;;; Markdown
+
+(use-package! markdown-ts-appear
+  :hook (markdown-ts-mode . markdown-ts-appear-mode))
+
+
 ;;; Org, capture, and notes
 
 (setq org-directory "~/org/")

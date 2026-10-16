@@ -567,10 +567,28 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
                         (when (eq (window-buffer win) (current-buffer))
                           (evil-insert-state)))
                       nil t)))
+(defun my-codex-display-buffer-right (buffer)
+  "Display Codex BUFFER to the right of the selected window."
+  (display-buffer buffer
+                  '((display-buffer-in-direction)
+                    (direction . right)
+                    (window-width . 0.5))))
+
+(after! codex-vterm
+  ;; Bracketed paste keeps embedded newlines from submitting separate prompts.
+  (cl-defmethod codex--term-submit-command ((_backend (eql vterm)) command)
+    "Paste COMMAND into Codex as one message, then submit it."
+    (vterm-send-key "u" nil nil t)
+    (vterm-send-string command t)
+    (codex--term-send-action 'vterm :return)))
 
 (use-package! codex
   :demand t
   :init
-  (setq codex-terminal-backend 'vterm)
+  (setq codex-terminal-backend 'vterm
+        codex-display-window-fn #'my-codex-display-buffer-right)
   :config
+  (add-hook 'codex-process-environment-functions #'my-codex-proxy-environment)
+  (map! :leader
+        :desc "Codex" "o x" codex-command-map)
   (global-set-key (kbd "C-c x") codex-command-map))

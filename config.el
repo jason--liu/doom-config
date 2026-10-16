@@ -218,6 +218,17 @@ Works for standard C/C++ modes and Tree-sitter modes."
 
 (add-hook 'after-init-hook #'breadcrumb-mode)
 
+(defun my/breadcrumb-refresh-after-eglot ()
+  "Invalidate breadcrumb's index when Eglot changes the Imenu provider."
+  (when (bound-and-true-p breadcrumb-local-mode)
+    (setq-local imenu--index-alist nil
+                breadcrumb--ipath-plain-cache nil
+                breadcrumb--last-update-tick 0)
+    ;; Let breadcrumb rebuild the index on idle, after Eglot finishes setup.
+    (force-mode-line-update t)))
+
+(add-hook 'eglot-managed-mode-hook #'my/breadcrumb-refresh-after-eglot)
+
 (defun my/asm-comment-tweak ()
   (setq-local comment-start "// "))
 

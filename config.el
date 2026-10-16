@@ -31,6 +31,7 @@
 
 (use-package! consult
   :config
+  (add-to-list 'consult-preview-allowed-hooks 'breadcrumb-mode)
   (map! "C-s" #'consult-line)
   (map! :map minibuffer-local-map "C-r" #'consult-history)
   (consult-customize

@@ -17,6 +17,10 @@
 
 (setq doom-localleader-key ",")
 
+;; Show prefix menus promptly
+(setq which-key-idle-delay 0.3
+      which-key-idle-secondary-delay 0.1)
+
 (setq confirm-kill-emacs nil)
 
 (after! doom-modeline

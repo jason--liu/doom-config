@@ -17,21 +17,39 @@
 (package! clang-format)
 (package! super-save)
 (package! breadcrumb)
+(package! egerrit
+  :recipe (:type git :repo "https://git.sr.ht/~niklaseklund/egerrit"
+           :local-repo "/home/qliu/work/tools/egerrit"))
 (package! auto-save :recipe (:host github :repo "manateelazycat/auto-save"))
 (package! doom-snippets :disable t)
 (package! org-appear)
 (package! markdown-ts-appear
   :recipe (:host github :repo "Thysrael/markdown-ts-appear"))
 (package! org-media-note :recipe (:host github :repo "yuchen-lea/org-media-note"))
-(package! org-roam-ui)
-(package! go-translate :recipe (:host github :repo "lorniu/go-translate"))
 (package! leetcode)
+(package! gt :recipe (:host github :repo "lorniu/gt.el"))
 (package! eglot-inactive-regions :recipe (:host github :repo "fargiolas/eglot-inactive-regions"))
 ;; (package! treesit-auto)
 
 
 (package! rime :recipe (:host github :repo "DogLooksGood/emacs-rime" :files ("*.el" "Makefile" "lib.c")))
-(package! codex :recipe (:host github :repo "benthamite/codex"))
+(package! codex-ide
+  :recipe (:host github :repo "dgillis/emacs-codex-ide"
+           :files (:defaults "bin")))
+(package! claude-code-ide
+  :recipe (:host github :repo "manzaltu/claude-code-ide.el"))
+;; skeeto/emacs-web-server (simple-httpd) shares this repo name; keep a
+;; distinct clone so straight never builds web-server from simple-httpd.
+(package! web-server
+  :recipe (:host github :repo "eschulte/emacs-web-server"
+           :local-repo "eschulte-emacs-web-server"))
+(package! ghostel
+  :recipe (:host github :repo "dakra/ghostel"
+           :files (:defaults "etc" "src" "vendor" "build.zig" "build.zig.zon"
+                   "symbols.map")))
+(package! evil-ghostel
+  :recipe (:host github :repo "dakra/ghostel"
+           :files ("extensions/evil-ghostel/evil-ghostel.el")))
 
 
 ;; To install a package directly from a remote git repo, you must specify a

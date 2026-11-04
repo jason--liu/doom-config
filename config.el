@@ -29,6 +29,61 @@
 
 ;;; Editing, navigation, and files
 
+(defun my/gt-overlay-dismiss-keys (translator)
+  "Make TRANSLATOR's inline results dismissible with q or C-g."
+  (let* ((source (car (oref translator bounds)))
+         (dismiss (lambda ()
+                    (interactive)
+                    (when (buffer-live-p source)
+                      (with-current-buffer source
+                        (save-restriction
+                          (widen)
+                          (gt-delete-render-overlays (point-min) (point-max)))))))
+         (map (make-sparse-keymap)))
+    (define-key map (kbd "q") dismiss)
+    (define-key map (kbd "C-g") dismiss)
+    (set-transient-map
+     map
+     (lambda ()
+       (and (eq (current-buffer) source)
+            (save-restriction
+              (widen)
+              (gt-overlay-render-get-overlays (point-min) (point-max)))))
+     dismiss)))
+
+(use-package! gt
+  :commands gt-translate
+  :init
+  (map! :leader :desc "Translate English/Chinese" "o g" #'gt-translate)
+  :config
+  (setq gt-langs '(en zh)
+        gt-http-backend (pdd-url-backend)
+        gt-http-proxy "http://proxy.swlab.metax-tech.com:1080"
+        gt-default-translator
+        (gt-translator
+         :taker (gt-taker :text 'word :pick nil :prompt nil)
+         :engines (gt-google-engine)
+         :render (gt-overlay-render :type 'after :sface nil
+                                    :then #'my/gt-overlay-dismiss-keys))))
+(setq gt-source-text-transformer
+      (lambda (c engine )
+        (string-replace "\n" " " c)))
+
+(defun my/gt-overlay-fill-a (orig render src res prefix)
+  "Fill paragraph translations from ORIG to `fill-column'.
+Google returns one line per paragraph, and an overlay string is not
+filled, so long results become very long lines.  Words are left as is."
+  (let ((str (funcall orig render src res prefix))
+        (width fill-column))
+    (if (gt-word-p nil src)
+        str
+      (with-temp-buffer
+        (insert str)
+        (let ((fill-column width))
+          (fill-region (point-min) (point-max)))
+        (buffer-string)))))
+(advice-add 'gt-overlay-render-format :around #'my/gt-overlay-fill-a)
+
 (use-package! consult
   :config
   (add-to-list 'consult-preview-allowed-hooks 'breadcrumb-mode)
@@ -248,7 +303,7 @@ Works for standard C/C++ modes and Tree-sitter modes."
             100)
   (setq eglot-ignored-server-capabilities
         '(:hoverProvider
-          :documentSymbolProvider
+          ;; :documentSymbolProvider
           :workspaceSymbolProvider
           :documentLinkProvider
           :executeCommandProvider
@@ -278,6 +333,18 @@ Works for standard C/C++ modes and Tree-sitter modes."
                 (setq-local treesit-language-remap-alist '((cpp . cuda)))))))
 
 (setq c-ts-mode-indent-style 'linux)
+;; Doom guesses `c-basic-offset' as the indent var for c-ts-mode. Once helpful
+;; loads cc-vars without cc-mode, that is still `set-from-style', and copying
+;; it into `tab-width' breaks opening C files. Keep `tab-width' as is.
+(set-indent-vars! '(c-ts-mode c++-ts-mode) 'tab-width)
+
+(defun my/c-kernel-indent-h ()
+  "Use Linux kernel indentation: 8-column tabs for each level."
+  (setq-local c-ts-mode-indent-offset 8
+              tab-width 8
+              standard-indent 8
+              indent-tabs-mode t))
+(add-hook 'c-ts-mode-hook #'my/c-kernel-indent-h)
 
 (defun my/quickrun-c-snippet ()
   "Wrap the selected region (or current line) in a minimal C program,
@@ -491,14 +558,6 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
                  "--referrer=https://www.bilibili.com"
                  "--ytdl-raw-options=cookies-from-browser=[chrome]")))
 
-(use-package! org-roam-ui
-  :after org-roam
-  :config
-  (setq org-roam-ui-sync-theme nil
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t))
-
 
 ;;; Input method
 
@@ -551,6 +610,99 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
 
 ;;; Version control and diffs
 
+(defun my/gerrit-evil-dashboard-keys (mode map keys)
+  "Keep dashboard MAP's KEYS accessible in Evil for MODE."
+  (evil-set-initial-state mode 'motion)
+  (dolist (key keys)
+    (evil-define-key* '(normal motion) map (kbd key) (lookup-key map (kbd key)))))
+
+(defun my/egerrit-publish-comments ()
+  "Send and publish comments before closing the Egerrit review once."
+  (interactive)
+  (unless (and (boundp 'egerrit--current-change)
+               (egerrit-change-p egerrit--current-change)
+               (boundp 'egerrit--current-revision)
+               (egerrit-revision-p egerrit--current-revision))
+    (user-error "Publish comments from an active Egerrit review or conversation buffer"))
+  (let ((change egerrit--current-change)
+        (revision egerrit--current-revision))
+    ;; Egerrit's requests are synchronous; no timer or intermediate quit needed.
+    (egerrit-send-draft-comments)
+    (egerrit-post-draft-comments change revision)
+    (egerrit-quit-review-or-feedback)))
+
+(defvar my/egerrit-comment-change-id nil
+  "Unambiguous Gerrit change identifier for the current detail request.")
+
+(defun my/egerrit-with-comment-change-id (original data)
+  "Scope comment lookups to the full change identifier in DATA."
+  (let ((my/egerrit-comment-change-id (alist-get 'id data)))
+    (funcall original data)))
+
+(defun my/egerrit-read-comments (original change-id)
+  "Avoid ambiguous bare Change-Ids when retrieving comments."
+  (funcall original (or my/egerrit-comment-change-id change-id)))
+
+(defun my/egerrit-hide-windows ()
+  "Hide Egerrit windows on this frame, preserving buffers and comments."
+  (interactive)
+  (dolist (window (window-list))
+    (when (and (window-live-p window)
+               (with-current-buffer (window-buffer window)
+                 (string-prefix-p "egerrit-" (symbol-name major-mode))))
+      (quit-window nil window)
+      ;; A window's previous buffer can also belong to Egerrit.
+      (when (and (window-live-p window)
+                 (with-current-buffer (window-buffer window)
+                   (string-prefix-p "egerrit-" (symbol-name major-mode))))
+        (set-window-buffer window (get-buffer-create "*scratch*"))))))
+
+(use-package! egerrit
+  :commands egerrit-dashboard
+  :init
+  (setq egerrit-request-url "codereview.sh.metax-internal.com")
+  (map! :leader
+        (:prefix ("g /" . "Gerrit")
+         :desc "Egerrit dashboard" "e" #'egerrit-dashboard))
+  :config
+  (advice-add 'egerrit--create-detailed-change :around #'my/egerrit-with-comment-change-id)
+  (advice-add 'egerrit--read-comments :around #'my/egerrit-read-comments)
+  ;; Upstream's publisher quits twice and loses buffer-local review context.
+  (advice-add 'egerrit-publish-comments :override #'my/egerrit-publish-comments)
+  ;; The internal Gerrit server is reachable directly, not via the web proxy.
+  (setq egerrit--request-curl-options
+        '("--silent" "--show-error" "--noproxy" "codereview.sh.metax-internal.com"))
+  ;; Use queries supported by this server; omit is:ignored and assignee filters.
+  (setf (alist-get "Gerrit Dashboard" egerrit-changes-queries nil nil #'equal)
+        '(("Has draft comments" . ("has:draft"))
+          ("Your turn" . ("attention:self"))
+          ("Work in progress" . ("is:open owner:self is:wip"))
+          ("Outgoing reviews" . ("is:open owner:self -is:wip"))
+          ("Incoming reviews" . ("is:open -owner:self -is:wip reviewer:self"))
+          ("CCed on" . ("is:open cc:self"))
+          ("Recently closed" . ("is:closed (owner:self OR reviewer:self OR cc:self)" 20))))
+  (add-to-list 'egerrit-project-configs
+               '(:name "MACA/driver/metax"
+                 :code-repo "~/work/maca/driver/metax"))
+  (my/gerrit-evil-dashboard-keys
+   'egerrit-dashboard-mode egerrit-dashboard-mode-map
+   '("a" "B" "c" "g" "i" "r" "s" "v" "y" "<return>" "S-<return>" "?"))
+  (evil-define-key* '(normal motion) egerrit-dashboard-mode-map
+    (kbd "q") #'my/egerrit-hide-windows)
+  ;; Terminal Enter can generate RET instead of the GUI <return> event.
+  (evil-define-key '(normal motion) egerrit-dashboard-mode-map
+    (kbd "RET") #'egerrit-author-review-change)
+  (transient-suffix-put 'egerrit-reviewer-dispatch 'egerrit-review-change :key "RET")
+  (transient-suffix-put 'egerrit-dispatch 'egerrit-author-review-change :key "RET")
+  (dolist (mode '(egerrit-conversation-mode egerrit-diff-mode))
+    (evil-set-initial-state mode 'normal))
+  (dolist (map (list egerrit-diff-mode-map egerrit-conversation-mode-map))
+    (evil-define-key* '(normal motion visual) map
+      (kbd "C-c") (lookup-key map (kbd "C-c"))))
+  (evil-define-key* '(normal motion) egerrit-conversation-mode-map
+    (kbd "RET") #'egerrit-visit-conversation
+    (kbd "<return>") #'egerrit-visit-conversation))
+
 (use-package! magit
   :config
   (setq magit-revision-insert-related-refs nil)
@@ -577,6 +729,13 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
 
 ;;; Terminals and Codex
 
+(defun my-codex-proxy-environment (_buffer-name _directory)
+  "Give Codex the proxy required for account and workspace discovery."
+  '("HTTP_PROXY=http://proxy.swlab.metax-tech.com:1080"
+    "HTTPS_PROXY=http://proxy.swlab.metax-tech.com:1080"
+    "http_proxy=http://proxy.swlab.metax-tech.com:1080"
+    "https_proxy=http://proxy.swlab.metax-tech.com:1080"))
+
 (add-hook 'vterm-mode-hook
           (lambda ()
             (add-hook 'window-selection-change-functions
@@ -584,28 +743,82 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
                         (when (eq (window-buffer win) (current-buffer))
                           (evil-insert-state)))
                       nil t)))
-(defun my-codex-display-buffer-right (buffer)
-  "Display Codex BUFFER to the right of the selected window."
-  (display-buffer buffer
-                  '((display-buffer-in-direction)
-                    (direction . right)
-                    (window-width . 0.5))))
 
-(after! codex-vterm
-  ;; Bracketed paste keeps embedded newlines from submitting separate prompts.
-  (cl-defmethod codex--term-submit-command ((_backend (eql vterm)) command)
-    "Paste COMMAND into Codex as one message, then submit it."
-    (vterm-send-key "u" nil nil t)
-    (vterm-send-string command t)
-    (codex--term-send-action 'vterm :return)))
+(defun my-codex-ide-proxy-environment (environment)
+  "Add the working Codex proxy settings to ENVIRONMENT."
+  (append (my-codex-proxy-environment nil nil) environment))
 
-(use-package! codex
-  :demand t
+(use-package! codex-ide
+  :commands (codex-ide codex-ide-menu)
   :init
-  (setq codex-terminal-backend 'vterm
-        codex-display-window-fn #'my-codex-display-buffer-right)
+  (setq codex-ide-new-session-split 'vertical)
+  (map! :leader :desc "Codex IDE menu" "o X" #'codex-ide-menu)
   :config
-  (add-hook 'codex-process-environment-functions #'my-codex-proxy-environment)
-  (map! :leader
-        :desc "Codex" "o x" codex-command-map)
-  (global-set-key (kbd "C-c x") codex-command-map))
+  (advice-add 'codex-ide--app-server-process-environment :filter-return
+              #'my-codex-ide-proxy-environment))
+
+(defun my/claude-code-ide-with-proxy (original &rest args)
+  "Start Claude with the working proxy and direct access to local MCP servers."
+  (let* ((bypass (mapconcat #'identity
+                           (delq nil (list "localhost,127.0.0.1,::1"
+                                           (getenv "NO_PROXY") (getenv "no_proxy")))
+                           ","))
+         (environment (append (my-codex-proxy-environment nil nil)
+                              (list (concat "NO_PROXY=" bypass)
+                                    (concat "no_proxy=" bypass))))
+         (process-environment (append environment process-environment)))
+    (apply original args)))
+
+(use-package! ghostel
+  :defer t
+  :init
+  ;; Keep the native module out of straight's build dir so `doom sync'
+  ;; rebuilds don't delete it while Emacs has it loaded.
+  (setq ghostel-module-directory (expand-file-name "ghostel/" doom-data-dir)
+        ghostel-module-auto-install 'download)
+  :config
+  ;; Let M-o reach `ace-window' instead of the terminal.  `setopt' runs the
+  ;; :set function, which rebuilds `ghostel-semi-char-mode-map'.
+  (setopt ghostel-keymap-exceptions
+          (cons "M-o" ghostel-keymap-exceptions)))
+
+(use-package! evil-ghostel
+  :after (ghostel evil)
+  :hook (ghostel-mode . evil-ghostel-mode))
+
+(use-package! claude-code-ide
+  :commands (claude-code-ide claude-code-ide-menu)
+  :init
+  (setq claude-code-ide-terminal-backend 'ghostel
+        claude-code-ide-window-side 'right)
+  (map! :leader :desc "Claude Code IDE menu" "o c" #'claude-code-ide-menu)
+  :config
+  (advice-add 'claude-code-ide--create-terminal-session :around
+              #'my/claude-code-ide-with-proxy)
+  (claude-code-ide-emacs-tools-setup))
+
+(after! codex-ide-status-mode
+  (map! :map codex-ide-status-mode-map
+        :nm "RET" #'codex-ide-status-mode-display-session-at-point
+        :nm "<return>" #'codex-ide-status-mode-display-session-at-point
+        :nm "M-RET" #'codex-ide-status-mode-display-session-at-point-other-window
+        :nm "M-<return>" #'codex-ide-status-mode-display-session-at-point-other-window))
+
+(defun my/magit-push-gerrit (branch)
+  "Push HEAD to refs/for/BRANCH on origin for review."
+  (interactive
+   (list (magit-completing-read
+          "Target branch"
+          (magit-list-remote-branch-names "origin" t)
+          nil nil nil nil "dev")))
+  (magit-run-git-async
+   "push" "origin" (format "HEAD:refs/for/%s" branch)))
+
+(transient-append-suffix 'magit-push "p"
+  '("g" "Gerrit review" my/magit-push-gerrit
+    :if (lambda ()
+          (file-exists-p
+           (expand-file-name "hooks/commit-msg" (magit-gitdir))))))
+
+;; (setopt markdown-ts-appear-table-reveal 'table)
+

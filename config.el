@@ -2,6 +2,11 @@
 
 ;; Private Doom configuration. Changes to this file do not require doom sync.
 
+(defvar my/lab-proxy
+  (when (string-suffix-p ".metax-tech.com" (system-name))
+    "http://proxy.swlab.metax-tech.com:1080")
+  "HTTP proxy for the lab network, or nil on machines that need none.")
+
 ;;; Appearance and core settings
 
 (setq doom-font (font-spec :family "YaHei Consolas Hybrid" :size 30)
@@ -58,7 +63,7 @@
   :config
   (setq gt-langs '(en zh)
         gt-http-backend (pdd-url-backend)
-        gt-http-proxy "http://proxy.swlab.metax-tech.com:1080"
+        gt-http-proxy my/lab-proxy
         gt-default-translator
         (gt-translator
          :taker (gt-taker :text 'word :pick nil :prompt nil)
@@ -731,10 +736,9 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
 
 (defun my-codex-proxy-environment (_buffer-name _directory)
   "Give Codex the proxy required for account and workspace discovery."
-  '("HTTP_PROXY=http://proxy.swlab.metax-tech.com:1080"
-    "HTTPS_PROXY=http://proxy.swlab.metax-tech.com:1080"
-    "http_proxy=http://proxy.swlab.metax-tech.com:1080"
-    "https_proxy=http://proxy.swlab.metax-tech.com:1080"))
+  (when my/lab-proxy
+    (mapcar (lambda (var) (concat var "=" my/lab-proxy))
+            '("HTTP_PROXY" "HTTPS_PROXY" "http_proxy" "https_proxy"))))
 
 (add-hook 'vterm-mode-hook
           (lambda ()

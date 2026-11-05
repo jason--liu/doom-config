@@ -43,6 +43,11 @@
 (package! web-server
   :recipe (:host github :repo "eschulte/emacs-web-server"
            :local-repo "eschulte-emacs-web-server"))
+;; Override :term ghostel's older pin with v0.60.0.  The native module in
+;; .local/etc/ghostel/ must be the same release (see ghostel-module.version).
+;; Both packages come from one repo, so keep the pins identical.
+(package! ghostel :pin "2c13feaa31da8a55a0471210cd26414d7265ee1e")
+(package! evil-ghostel :pin "2c13feaa31da8a55a0471210cd26414d7265ee1e")
 
 
 ;; To install a package directly from a remote git repo, you must specify a

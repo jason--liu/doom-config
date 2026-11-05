@@ -43,13 +43,6 @@
 (package! web-server
   :recipe (:host github :repo "eschulte/emacs-web-server"
            :local-repo "eschulte-emacs-web-server"))
-(package! ghostel
-  :recipe (:host github :repo "dakra/ghostel"
-           :files (:defaults "etc" "src" "vendor" "build.zig" "build.zig.zon"
-                   "symbols.map")))
-(package! evil-ghostel
-  :recipe (:host github :repo "dakra/ghostel"
-           :files ("extensions/evil-ghostel/evil-ghostel.el")))
 
 
 ;; To install a package directly from a remote git repo, you must specify a

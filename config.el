@@ -740,7 +740,7 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
     (mapcar (lambda (var) (concat var "=" my/lab-proxy))
             '("HTTP_PROXY" "HTTPS_PROXY" "http_proxy" "https_proxy"))))
 
-(add-hook 'vterm-mode-hook
+(add-hook 'ghostel-mode-hook
           (lambda ()
             (add-hook 'window-selection-change-functions
                       (lambda (win)
@@ -785,10 +785,6 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
   ;; :set function, which rebuilds `ghostel-semi-char-mode-map'.
   (setopt ghostel-keymap-exceptions
           (cons "M-o" ghostel-keymap-exceptions)))
-
-(use-package! evil-ghostel
-  :after (ghostel evil)
-  :hook (ghostel-mode . evil-ghostel-mode))
 
 (use-package! claude-code-ide
   :commands (claude-code-ide claude-code-ide-menu)

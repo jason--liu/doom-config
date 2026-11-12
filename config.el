@@ -740,13 +740,19 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
     (mapcar (lambda (var) (concat var "=" my/lab-proxy))
             '("HTTP_PROXY" "HTTPS_PROXY" "http_proxy" "https_proxy"))))
 
+(defun my/ghostel-insert-on-select (win)
+  "Enter insert state when WIN, showing this ghostel buffer, is selected.
+Skip it while point is away from the live prompt (scrolled up, copy mode),
+because insert-state entry snaps point back to the terminal cursor."
+  (when (and (eq (window-buffer win) (current-buffer))
+             (eq ghostel--input-mode 'semi-char)
+             (ghostel-point-on-cursor-row-p))
+    (evil-insert-state)))
+
 (add-hook 'ghostel-mode-hook
           (lambda ()
             (add-hook 'window-selection-change-functions
-                      (lambda (win)
-                        (when (eq (window-buffer win) (current-buffer))
-                          (evil-insert-state)))
-                      nil t)))
+                      #'my/ghostel-insert-on-select nil t)))
 
 (defun my-codex-ide-proxy-environment (environment)
   "Add the working Codex proxy settings to ENVIRONMENT."
@@ -781,10 +787,86 @@ run it with quickrun, and keep the temp buffer invisible/cleaned up."
   (setq ghostel-module-directory (expand-file-name "ghostel/" doom-data-dir)
         ghostel-module-auto-install 'download)
   :config
-  ;; Let M-o reach `ace-window' instead of the terminal.  `setopt' runs the
-  ;; :set function, which rebuilds `ghostel-semi-char-mode-map'.
+  ;; Let M-o (`ace-window') and M-0..M-9 (`+workspace/switch-to-N') reach
+  ;; Emacs instead of the terminal.  `setopt' runs the :set function, which
+  ;; rebuilds `ghostel-semi-char-mode-map'.
   (setopt ghostel-keymap-exceptions
-          (cons "M-o" ghostel-keymap-exceptions)))
+          (append '("M-o" "M-0" "M-1" "M-2" "M-3" "M-4"
+                    "M-5" "M-6" "M-7" "M-8" "M-9")
+                  ghostel-keymap-exceptions)))
+
+;;; Terminal in a window on the right, e.g. for ssh next to the source.
+
+(defvar-local my/ghostel-side-root nil
+  "Project root that this side terminal belongs to, or nil if it isn't one.")
+(put 'my/ghostel-side-root 'permanent-local t)
+
+(defun my/ghostel-side--buffer (root)
+  "Return the live side terminal that belongs to ROOT, or nil."
+  (seq-find (lambda (b) (equal (buffer-local-value 'my/ghostel-side-root b) root))
+            (buffer-list)))
+
+(defun my/ghostel-side--window ()
+  "Return a window in the selected frame that shows any side terminal."
+  (seq-find (lambda (w) (buffer-local-value 'my/ghostel-side-root (window-buffer w)))
+            (window-list)))
+
+(defun my/ghostel-side--mark (win)
+  "Remember whether WIN was split off for a side terminal."
+  (when (window-live-p win)
+    (set-window-parameter
+     win 'my/ghostel-side-split
+     (eq (nth 1 (window-parameter win 'quit-restore)) 'window))))
+
+(defun my/ghostel-side ()
+  "Toggle this project's side terminal in a window to the right.
+Each project root gets its own `*ghostel:side:NAME*' terminal; buffers
+outside any project share the one for \"~/\".  If the terminal is
+visible, hide its window (the shell keeps running).  If another
+project's side terminal is visible, show this one in its window.
+Otherwise show it, creating the terminal on first use."
+  (interactive)
+  (require 'ghostel)                    ; `ghostel-create' isn't autoloaded
+  (let* ((root (or my/ghostel-side-root  ; inside a side terminal: that one
+                   (doom-project-root)
+                   (expand-file-name "~/")))
+         (action '((display-buffer-reuse-window display-buffer-in-direction)
+                   (direction . right)
+                   (window-width . 0.5)))
+         (buf (my/ghostel-side--buffer root))
+         (win (and buf (get-buffer-window buf)))
+         (other-win (and (not win) (my/ghostel-side--window))))
+    (cond
+     ;; Delete the window we split off.  `quit-window' alone would not
+     ;; after a project swap: its quit-restore check wants the original
+     ;; buffer and no previous buffer, so it would show the old terminal.
+     ;; A window the terminal reused instead gets its old buffer back.
+     (win (if (and (window-parameter win 'my/ghostel-side-split)
+                   (not (eq win (frame-root-window win))))
+              (delete-window win)
+            (quit-window nil win)))
+     ;; Another project's terminal is on the right: swap ours into it.
+     ((and other-win (buffer-live-p buf))
+      (set-window-buffer other-win buf)
+      (select-window other-win))
+     ((buffer-live-p buf)
+      (my/ghostel-side--mark (pop-to-buffer buf action)))
+     (t
+      ;; From a TRAMP buffer, start the shell locally rather than remotely.
+      (let* ((default-directory (if (file-remote-p root)
+                                    (expand-file-name "~/")
+                                  root))
+             (name (format "*ghostel:side:%s*" (doom-project-name root)))
+             (new (ghostel-create name (unless other-win action))))
+        (with-current-buffer new
+          (setq my/ghostel-side-root root))
+        (if other-win
+            (progn (set-window-buffer other-win new)
+                   (select-window other-win))
+          (my/ghostel-side--mark (get-buffer-window new))))))))
+
+;; Replaces Doom's "Open ghostel here" (`+ghostel/here'); still on M-x ghostel.
+(map! :leader :desc "Terminal on the right" "o T" #'my/ghostel-side)
 
 (use-package! claude-code-ide
   :commands (claude-code-ide claude-code-ide-menu)
